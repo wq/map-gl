@@ -1,8 +1,21 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { useComponents } from "@wq/react";
+import { useComponents, createFallbackComponents, withWQ } from "@wq/react";
+import OverlayToggle from "./OverlayToggle.js";
+import BasemapToggle from "./BasemapToggle.js";
 
-export default function MapToolbar({
+const MapToolbarFallback = {
+    components: {
+        OverlayToggle,
+        BasemapToggle,
+        ...createFallbackComponents(
+            ["SidePanel", "List", "ListSubheader"],
+            "@wq/material"
+        ),
+    },
+};
+
+function MapToolbar({
     overlays,
     basemaps,
     showOverlay,
@@ -74,3 +87,5 @@ MapToolbar.propTypes = {
     children: PropTypes.node,
     anchor: PropTypes.string,
 };
+
+export default withWQ(MapToolbar, { fallback: MapToolbarFallback });

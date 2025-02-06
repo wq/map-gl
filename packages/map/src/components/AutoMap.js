@@ -1,20 +1,101 @@
 import React, { useMemo } from "react";
-import { useComponents, usePlugin } from "@wq/react";
-import { useMapState, useOverlayComponents } from "../hooks.js";
+import {
+    useConfig,
+    useComponents,
+    withWQ,
+    createFallbackComponents,
+} from "@wq/react";
+import { useRootMapReducer, MapReducerProvider } from "../hooks.js";
+import MapContainer from "./MapContainer.js";
+import MapToolbar from "./MapToolbar.js";
+import Map from "./Map.js";
+import MapLayers from "./MapLayers.js";
+import AutoOverlay from "./AutoOverlay.js";
 import PropTypes from "prop-types";
 
-export default function AutoMap({
+export const AutoMapFallback = {
+    config: {
+        map: {
+            basemaps: _defaultBasemaps(),
+            initBounds: [
+                [-180, -90],
+                [180, 90],
+            ],
+            tiles: null,
+            autoZoom: {
+                wait: 0.5, // How long to wait before triggering autoZoom
+                // Settings for fitBounds
+                maxZoom: 13,
+                animate: true,
+            },
+        },
+    },
+    components: {
+        MapContainer,
+        MapToolbar,
+        Map,
+        MapLayers,
+        ...createFallbackComponents(
+            ["MapInteraction", "MapAutoZoom", "MapIdentify", "Highlight"],
+            "@wq/map-gl",
+            "MapProvider"
+        ),
+    },
+};
+
+export const AutoMapDefaults = {
+    components: {
+        AutoOverlay,
+    },
+};
+
+function AutoMap({
     name,
     mapId,
     toolbar = true,
     toolbarAnchor = "top-right",
     containerStyle,
-    context,
-    state,
+    context = {},
+    overlays: initialOverlays = [],
+    basemaps: initialBasemaps = null,
+    initBounds: initialInitBounds = null,
+    tiles: initialTiles = null,
+    autoZoom: initialAutoZoom = null,
+    activeBasemap = null,
+    onChangeBasemap = null,
+    activeOverlays = null,
+    onChangeOverlays = null,
     children,
+    mapProps = {},
 }) {
-    const mapState = useMapState(),
-        { showOverlay, hideOverlay, setBasemap } = usePlugin("map"),
+    const config = useConfig("map");
+    if (initialBasemaps === null) {
+        initialBasemaps = config.basemaps;
+    }
+    if (initialInitBounds === null) {
+        initialInitBounds = config.initBounds;
+    }
+    if (initialTiles === null) {
+        initialTiles = config.tiles;
+    }
+    if (initialAutoZoom === null) {
+        initialAutoZoom = config.autoZoom;
+    }
+
+    const reducer = useRootMapReducer(
+            {
+                basemaps: initialBasemaps,
+                overlays: initialOverlays,
+                initBounds: initialInitBounds,
+                tiles: initialTiles,
+                autoZoom: initialAutoZoom,
+                activeBasemap,
+                activeOverlays,
+            },
+            onChangeBasemap,
+            onChangeOverlays
+        ),
+        [state, actions] = reducer,
         {
             MapContainer,
             MapToolbar,
@@ -23,28 +104,11 @@ export default function AutoMap({
             MapAutoZoom,
             MapIdentify,
             MapLayers,
-            AutoBasemap,
             AutoOverlay,
+            Highlight,
         } = useComponents(),
-        { Highlight } = useOverlayComponents();
-
-    if (!state) {
-        state = mapState;
-    }
-
-    if (!state) {
-        return null;
-    }
-
-    const {
-        basemaps,
-        overlays,
-        initBounds,
-        tiles,
-        mapProps,
-        autoZoom,
-        highlight,
-    } = state;
+        { basemaps, overlays, initBounds, tiles, autoZoom, highlight } = state,
+        { showOverlay, hideOverlay, setBasemap } = actions;
 
     const defaultTileSource = useMemo(() => {
         if (!tiles) {
@@ -87,57 +151,92 @@ export default function AutoMap({
     }
 
     return (
-        <MapContainer name={name} mapId={mapId}>
-            {toolbarAnchor.endsWith("left") && toolbar}
-            <Map
-                name={name}
-                mapId={mapId}
-                initBounds={initBounds}
-                mapProps={mapProps}
-                containerStyle={containerStyle}
-            >
-                <MapInteraction name={name} mapId={mapId} />
-                {!!autoZoom && (
-                    <MapAutoZoom
-                        name={name}
-                        mapId={mapId}
-                        context={context}
-                        {...autoZoom}
-                    />
-                )}
-                {identify && (
-                    <MapIdentify name={name} mapId={mapId} context={context} />
-                )}
-                <MapLayers>
-                    {defaultTileSource && (
-                        <AutoOverlay active {...defaultTileSource} />
+        <MapReducerProvider value={reducer}>
+            <MapContainer name={name} mapId={mapId}>
+                {toolbarAnchor.endsWith("left") && toolbar}
+                <Map
+                    name={name}
+                    mapId={mapId}
+                    initBounds={initBounds}
+                    containerStyle={containerStyle}
+                    basemap={basemaps.find((b) => b.active)}
+                    {...mapProps}
+                >
+                    <MapInteraction name={name} mapId={mapId} />
+                    {!!autoZoom && (
+                        <MapAutoZoom
+                            name={name}
+                            mapId={mapId}
+                            context={context}
+                            {...autoZoom}
+                        />
                     )}
-                    {basemaps.map((conf) => (
-                        <AutoBasemap key={conf.name} {...conf} />
-                    ))}
-                    {overlays.map((conf) => (
-                        <AutoOverlay
-                            key={conf.name}
-                            {...conf}
+                    {identify && (
+                        <MapIdentify
+                            name={name}
+                            mapId={mapId}
                             context={context}
                         />
-                    ))}
-                </MapLayers>
-                {highlight && <Highlight data={highlight} />}
-                {children}
-            </Map>
-            {toolbarAnchor.endsWith("right") && toolbar}
-        </MapContainer>
+                    )}
+                    <MapLayers>
+                        {defaultTileSource && (
+                            <AutoOverlay active {...defaultTileSource} />
+                        )}
+                        {overlays.map((conf) => (
+                            <AutoOverlay
+                                key={conf.name}
+                                {...conf}
+                                context={context}
+                            />
+                        ))}
+                    </MapLayers>
+                    {highlight && <Highlight data={highlight} />}
+                    {children}
+                </Map>
+                {toolbarAnchor.endsWith("right") && toolbar}
+            </MapContainer>
+        </MapReducerProvider>
     );
 }
 
 AutoMap.propTypes = {
     name: PropTypes.string,
     mapId: PropTypes.string,
-    toolbar: PropTypes.bool,
+    toolbar: PropTypes.oneOfType([PropTypes.bool, PropTypes.node]),
     toolbarAnchor: PropTypes.string,
     containerStyle: PropTypes.object,
     context: PropTypes.object,
-    state: PropTypes.object,
+    overlays: PropTypes.arrayOf(PropTypes.object),
+    activeBasemap: PropTypes.string,
+    onChangeBasemap: PropTypes.func,
+    activeOverlays: PropTypes.arrayOf(PropTypes.string),
+    onChangeOverlays: PropTypes.func,
     children: PropTypes.node,
+    basemaps: PropTypes.arrayOf(PropTypes.object),
+    initBounds: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
+    tiles: PropTypes.string,
+    autoZoom: PropTypes.object,
+    mapProps: PropTypes.object,
 };
+
+export default withWQ(AutoMap, {
+    defaults: AutoMapDefaults,
+    fallback: AutoMapFallback,
+});
+
+// Default base map configuration - override to customize
+function _defaultBasemaps() {
+    var cdn =
+        "https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg";
+    var attr =
+        'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.';
+
+    return [
+        {
+            name: "Stamen Terrain",
+            type: "tile",
+            url: cdn,
+            attribution: attr,
+        },
+    ];
+}

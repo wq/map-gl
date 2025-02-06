@@ -1,10 +1,18 @@
 import React from "react";
-import { useComponents, useViewComponents, usePluginReducer } from "@wq/react";
+import { useComponents, withWQ, createFallbackComponents } from "@wq/react";
+import { useMapReducer } from "../hooks.js";
 import PropTypes from "prop-types";
 
-export default function HighlightPopup({ inMap }) {
+const HighlightPopupFallback = {
+    components: createFallbackComponents(
+        ["Popup", "View", "ScrollView", "IconButton", "Text"],
+        "@wq/material"
+    ),
+};
+
+function HighlightPopup({ inMap }) {
     const { Popup, View, ScrollView, IconButton } = useComponents(),
-        [{ highlight }, { clearHighlight }] = usePluginReducer("map"),
+        [{ highlight }, { clearHighlight }] = useMapReducer(),
         features = (highlight && highlight.features) || [];
     if (inMap) {
         return null;
@@ -28,7 +36,10 @@ export default function HighlightPopup({ inMap }) {
                 />
                 <ScrollView style={{ maxHeight: "33vh" }}>
                     {features.map((feature) => (
-                        <HighlightContent key={feature.id} feature={feature} />
+                        <HighlightContentWQ
+                            key={feature.id}
+                            feature={feature}
+                        />
                     ))}
                 </ScrollView>
             </Popup>
@@ -36,19 +47,32 @@ export default function HighlightPopup({ inMap }) {
     );
 }
 
-export function HighlightContent({ feature, inMap }) {
+HighlightPopup.propTypes = {
+    inMap: PropTypes.bool,
+};
+
+export default withWQ(HighlightPopup, { fallback: HighlightPopupFallback });
+
+const HighlightContentFallback = {
+    components: {
+        DefaultPopup({ feature: { id, properties = {} } }) {
+            const { Text } = useComponents();
+            const label = properties.label || properties.name || id;
+            return <Text>{label}</Text>;
+        },
+    },
+};
+
+function HighlightContent({ feature, inMap }) {
     const popupName = feature.popup
             ? `${feature.popup}-popup`
             : "default-popup",
-        views = useViewComponents();
+        components = useComponents();
 
-    let View = views[popupName];
+    let View = components[popupName];
     if (!View) {
-        console.warn(`No popup view named ${popupName}, using default.`);
-        View = views["default-popup"];
-        if (!View) {
-            throw new Error("No popup view named default-popup!");
-        }
+        console.warn(`No component named ${popupName}, using default.`);
+        View = components["default-popup"];
     }
 
     return <View feature={feature} inMap={inMap} />;
@@ -58,3 +82,9 @@ HighlightContent.propTypes = {
     feature: PropTypes.object,
     inMap: PropTypes.bool,
 };
+
+const HighlightContentWQ = withWQ(HighlightContent, {
+    fallback: HighlightContentFallback,
+});
+
+export { HighlightContentWQ as HighlightContent };

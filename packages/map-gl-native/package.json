@@ -30,18 +30,15 @@
     },
     "homepage": "https://wq.io/@wq/map-gl",
     "dependencies": {
-        "@turf/circle": "^6.5.0",
-        "@wq/map": "^2.0.0"
+        "@wq/react": "^3.0.0-a1-dev1.g760eb56"
     },
     "peerDependencies": {
         "@maplibre/maplibre-react-native": "*",
-        "expo-location": "*",
-        "react-native-paper": "*"
+        "expo-location": "*"
     },
     "devDependencies": {
-        "@maplibre/maplibre-react-native": "github:maplibre/maplibre-react-native#a2b72b6",
-        "expo-location": "^16.1.0",
-        "jest-expo": "^49.0.0",
-        "react-native-paper": "^5.10.3"
+        "@maplibre/maplibre-react-native": "^10.0.1",
+        "expo-location": "^18.0.5",
+        "jest-expo": "^52.0.3"
     }
 }
