@@ -1,10 +1,33 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { useOverlayComponents, useDataProps } from "../hooks.js";
+import { createFallbackComponent, useComponents, withWQ } from "@wq/react";
+import { useDataProps } from "../hooks.js";
 
-export default function AutoOverlay({ type, data, context, ...conf }) {
-    const overlays = useOverlayComponents(),
-        Overlay = overlays[type],
+const AutoOverlayFallback = {
+    components: {
+        Text: createFallbackComponent("Text", "@wq/material"),
+        GeojsonOverlay({ url, data }) {
+            const { Text } = useComponents();
+            if (data) {
+                return <Text>GeoJSON {data.type}</Text>;
+            } else {
+                return <Text>GeoJSON at {url}</Text>;
+            }
+        },
+        TileOverlay({ url }) {
+            const { Text } = useComponents();
+            return <Text>Tile at {url}</Text>;
+        },
+        VectorTileOverlay({ url }) {
+            const { Text } = useComponents();
+            return <Text>Vector Tile at {url}</Text>;
+        },
+    },
+};
+
+function AutoOverlay({ type, data, context, ...conf }) {
+    const components = useComponents(),
+        Overlay = components[`${type}-overlay`] || components[type],
         dataProps = useDataProps(data, context);
 
     if (type === "empty") {
@@ -38,3 +61,5 @@ AutoOverlay.propTypes = {
     ]),
     context: PropTypes.object,
 };
+
+export default withWQ(AutoOverlay, { fallback: AutoOverlayFallback });

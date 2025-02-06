@@ -1,305 +1,106 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { useField } from "formik";
-import {
-    useRouteInfo,
-    usePlugin,
-    usePluginState,
-    useRenderContext,
-    useApp,
-    useComponents,
-    usePluginComponentMap,
-    useModel,
-    useReverse,
-} from "@wq/react";
-import Mustache from "mustache";
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useState,
+    useMemo,
+    useReducer,
+} from "react";
+import reducer, { actions } from "./reducer.js";
 
-export const TYPE_MAP = {
-    geopoint: "point",
-    geotrace: "line_string",
-    geoshape: "polygon",
-};
-
-export function useBasemapComponents() {
-    return usePluginComponentMap("map", "basemaps");
-}
-
-export function useOverlayComponents() {
-    return usePluginComponentMap("map", "overlays");
-}
-
-export function useGeoTools(name, type, mapId) {
-    const { zoomToLocation } = usePlugin("map").config,
-        tools = usePluginComponentMap("map", "geotools", true),
-        toggleName = `${name}_method`,
-        mapState = useMapState(),
-        { useMapInstance } = useComponents(),
-        instance = useMapInstance(mapId),
-        [, { value }, { setValue }] = useField(name),
-        [, { value: accuracy }, { setValue: setAccuracy }] = useField(
-            `${name}_accuracy`
-        ),
-        [, { value: activeTool }, { setValue: setActiveTool }] =
-            useField(toggleName);
-
-    const [defaultTool, DefaultTool] =
-            Object.entries(tools).find(([, Tool]) => Tool.toolDefault) ||
-            (null, () => null),
-        ActiveTool = tools[activeTool] || DefaultTool;
-
-    const setLocation = useCallback(
-        ({
-            geometry = null,
-            latitude = 0,
-            longitude = 0,
-            accuracy = null,
-            zoom = true,
-            save = false,
-        }) => {
-            if (!geometry) {
-                geometry = {
-                    type: "Point",
-                    coordinates: [longitude, latitude],
-                };
-            }
-
-            if (save) {
-                setValue(geometry);
-                setAccuracy(accuracy);
-            }
-
-            if (zoom && zoomToLocation) {
-                zoomToLocation(instance, geometry, {
-                    name,
-                    type,
-                    activeTool,
-                    mapState,
-                });
-            }
-        },
-        [instance]
+export function useRootMapReducer(
+    {
+        basemaps,
+        overlays,
+        initBounds,
+        tiles,
+        autoZoom,
+        activeOverlays,
+        activeBasemap,
+    },
+    onChangeBasemap,
+    onChangeOverlays
+) {
+    const [state, dispatch] = useReducer(
+        (state, action) => reducer(state, action),
+        {
+            basemaps,
+            overlays,
+            initBounds,
+            tiles,
+            autoZoom,
+            activeOverlays,
+            activeBasemap,
+        }
     );
+    const boundActions = useMemo(() => {
+        const boundActions = {};
+        for (const [key, action] of Object.entries(actions)) {
+            boundActions[key] = (...args) => dispatch(action(...args));
+        }
+        return boundActions;
+    }, [dispatch]);
 
     useEffect(() => {
-        if (
-            !activeTool &&
-            defaultTool &&
-            ActiveTool == DefaultTool &&
-            DefaultTool.toolLabel
-        ) {
-            setActiveTool(defaultTool);
-        }
-    }, [activeTool, ActiveTool]);
-
-    return useMemo(
-        () => ({
-            toggleProps: {
-                name: toggleName,
-                choices: Object.entries(tools)
-                    .filter(([, Tool]) => Tool.toolLabel)
-                    .map(([key, Tool]) => ({
-                        name: key,
-                        label: Tool.toolLabel,
-                    })),
-            },
-            setLocation,
-            ActiveTool,
-            value,
-            accuracy,
-        }),
-        [toggleName, tools, setLocation, ActiveTool, value, accuracy]
-    );
-}
-
-// Load map configuration for the given page
-export function useMapConfig() {
-    const { config } = usePlugin("map"),
-        routeInfo = useRouteInfo(),
-        context = useRenderContext();
-
-    return routeMapConf(config, routeInfo, context);
-}
-
-export function useMapState() {
-    const state = usePluginState("map"),
-        routeName = useRouteInfo().name,
-        routeState = state && state.routes && state.routes[routeName];
-    if (routeState) {
-        return routeState;
-    } else {
-        return null;
-    }
-}
-
-export function useMapInstance() {
-    throw new Error(
-        "@wq/map's useMapInstance() export is deprecated." +
-            " Load useMapInstance() via useComponents()," +
-            " or import it directly from @wq/map-gl"
-    );
-}
-
-function checkGroupLayers(layerconf) {
-    const { type, layers = [] } = layerconf;
-    if (type !== "group") {
-        return layerconf;
-    }
-    return {
-        ...layerconf,
-        layers: layers.map((layer, i) => {
-            if (layer.name) {
-                return layer;
-            }
-            return {
-                ...layer,
-                name: `${layerconf.name}-${i}`,
-            };
-        }),
-    };
-}
-
-export function routeMapConf(config, routeInfo, context = {}) {
-    const { page, mode, path, params, item_id, page_config } = routeInfo,
-        conf = config.maps[page === "outbox" ? page_config.name : page];
-
-    if (!conf) {
-        return null;
-    }
-    // FIXME: custom mapname
-    const mapname = "main";
-
-    // Start with defaults, override with mode-specific options
-    var mapconf = {
-        ...(conf.defaults.maps[mapname] || {}),
-        ...((conf[mode] || { maps: {} }).maps[mapname] || {}),
-        basemaps: config.basemaps.map(checkGroupLayers),
-        bounds: config.bounds,
-        tiles: config.tiles,
-    };
-
-    if (config.mapProps) {
-        mapconf.mapProps = config.mapProps;
-    }
-    if (typeof mapconf.autoZoom === "undefined") {
-        mapconf.autoZoom = { ...config.autoZoom };
-    }
-    if (mapconf.autoZoom === true) {
-        mapconf.autoZoom = {};
-    }
-    if (typeof mapconf.autoZoom.wait === "undefined") {
-        mapconf.autoZoom.wait = 0.5;
-    }
-    if (typeof mapconf.autoZoom.maxZoom === "undefined") {
-        mapconf.autoZoom.maxZoom = 13;
-    }
-    if (typeof mapconf.autoZoom.animate === "undefined") {
-        mapconf.autoZoom.animate = true;
-    }
-
-    // Combine (rather than overwrite) defaults + mode-specific layers
-    if (
-        mode &&
-        mode !== "defaults" &&
-        conf.defaults.maps[mapname] &&
-        conf.defaults.maps[mapname].layers
-    ) {
-        mapconf.layers = conf.defaults.maps[mapname].layers.concat(
-            mapconf.layers || []
-        );
-    }
-    if (!mapconf.name) {
-        mapconf.name = conf.name;
-    }
-    if (!mapconf.url) {
-        mapconf.url = conf.url;
-    }
-    if (!mapconf.layers) {
-        mapconf.layers = [];
-    }
-
-    // Compute default layer configuration for wq REST API
-    if (mapconf.autoLayers && mode !== "edit") {
-        const geometryFields = getGeometryFields((page_config || {}).form);
-        geometryFields.forEach((field) => {
-            let name = (page_config && page_config.label) || mapconf.name;
-            if (field.label) {
-                name += ` - ${field.label}`;
-            }
-            const defaultLayer = {
-                name,
-                type: "geojson",
-            };
-            if (!mode || mode === "list") {
-                Object.assign(defaultLayer, {
-                    data: ["context_feature_collection", field.name],
-                    popup: page,
-                    cluster: true,
-                });
-            } else {
-                Object.assign(defaultLayer, {
-                    data: ["context_feature", field.name],
-                    popup: page,
-                });
-            }
-            mapconf.layers.push(defaultLayer);
+        boundActions.initialize({
+            basemaps,
+            overlays,
+            initBounds,
+            tiles,
+            autoZoom,
+            activeOverlays,
+            activeBasemap,
         });
-    }
-    mapconf.layers = mapconf.layers.map(checkGroupLayers).map((layerconf) => {
-        // FIXME: recalculate
-        const baseurl = path.replace(/\/$/, "");
-        layerconf = {
-            active: true,
-            ...layerconf,
-        };
+    }, [basemaps, overlays, initBounds, tiles, autoZoom]);
 
-        if (layerconf.url && layerconf.url.indexOf("{{") > -1) {
-            layerconf.url = Mustache.render(layerconf.url, {
-                ...context,
-                id: item_id,
-                url: baseurl,
-            });
-            if (params) {
-                const pstr = new URLSearchParams(params).toString();
-                if (layerconf.url.indexOf("?") > -1) {
-                    layerconf.url += "&" + pstr;
-                } else {
-                    layerconf.url += "?" + pstr;
+    useEffect(() => {
+        if (onChangeBasemap) {
+            onChangeBasemap(state.activeBasemap);
+        }
+    }, [state.activeBasemap]);
+
+    useEffect(() => {
+        if (onChangeOverlays) {
+            onChangeOverlays(state.activeOverlays);
+        }
+    }, [state.activeOverlays]);
+
+    useEffect(() => {
+        if (activeBasemap && activeBasemap !== state.activeBasemap) {
+            boundActions.setBasemap(activeBasemap);
+        }
+    }, [activeBasemap, state.activeBasemap]);
+
+    useEffect(() => {
+        if (activeOverlays && activeOverlays !== state.activeOverlays) {
+            for (const name of activeOverlays) {
+                if (!state.activeOverlays.includes(name)) {
+                    boundActions.showOverlay(name);
+                }
+            }
+            for (const name of state.activeOverlays) {
+                if (!activeOverlays.includes(name)) {
+                    boundActions.hideOverlay(name);
                 }
             }
         }
-        return layerconf;
-    });
+    }, [activeOverlays, state.activeOverlays]);
 
-    return mapconf;
+    return [state, boundActions];
 }
 
-function getGeometryFields(form, prefix = "") {
-    const geometryFields = [];
-    (form || []).forEach((field) => {
-        if (field.type.startsWith("geo")) {
-            geometryFields.push({
-                name: prefix + field.name,
-                label: field.label || field.name,
-            });
-        } else if (field.type === "group") {
-            geometryFields.push(
-                ...getGeometryFields(
-                    field.children,
-                    (prefix = `${field.name}.`)
-                )
-            );
-        } else if (field.type === "repeat") {
-            geometryFields.push(
-                ...getGeometryFields(
-                    field.children,
-                    (prefix = `${field.name}[].`)
-                )
-            );
-        }
-    });
-    if (geometryFields.length === 0 && !prefix) {
-        geometryFields.push({ name: "geometry", label: "" });
-    }
-    return geometryFields;
+const MapReducerContext = createContext();
+
+export function MapReducerProvider({ children, state, actions }) {
+    return (
+        <MapReducerContext.Provider value={[state, actions]}>
+            {children}
+        </MapReducerContext.Provider>
+    );
+}
+
+export function useMapReducer() {
+    return useContext(MapReducerContext);
 }
 
 export function contextFeatureCollection(context, fieldName) {
@@ -384,14 +185,10 @@ export function useDataProps(data, context) {
 const _cache = {};
 
 export function useGeoJSON(url, data) {
-    const app = useApp(),
-        [geojson, setGeojson] = useState();
+    const [geojson, setGeojson] = useState();
 
     if (url && !(url.indexOf("/") === 0 || url.indexOf("http") === 0)) {
-        console.warn(
-            new Error(`Use "{{{rt}}}/${url}" instead of relative URL`)
-        );
-        url = app.service + "/" + url;
+        throw new Error("Invalid URL: " + url);
     }
 
     useEffect(() => {
@@ -409,19 +206,16 @@ export function useGeoJSON(url, data) {
             return;
         }
 
-        app.spin.start();
-        app.store.ajax(url).then(
+        fetch(url).then(
             function (data) {
-                app.spin.stop();
                 _cache[url] = data;
                 setGeojson(data);
             },
             function () {
-                app.spin.stop();
                 setGeojson(null);
             }
         );
-    }, [url, data, app]);
+    }, [url, data]);
 
     return geojson;
 }
@@ -695,61 +489,4 @@ function makeColorLayers(layer, color, pointColor = color) {
             ...rest,
         },
     ];
-}
-
-export function useFeatureValues(feature, modelConf) {
-    const slug = feature.properties[modelConf.lookup] || feature.id,
-        form = modelConf.form || [{ name: "label" }],
-        emptyForm = makeEmptyForm(form),
-        app = useApp(),
-        modelData = useModel(modelConf.name, slug),
-        [fetchData, setFetchData] = useState({});
-
-    useEffect(() => {
-        loadData();
-        async function loadData() {
-            const data = await app.models[modelConf.name].find(slug);
-            if (data) {
-                setFetchData(data);
-            }
-        }
-    }, [app, modelConf, slug]);
-
-    return {
-        ...emptyForm,
-        ...feature.properties,
-        ...fetchData,
-        ...modelData,
-    };
-}
-
-function makeEmptyForm(form) {
-    const values = {};
-    for (const field of form) {
-        if (field.name === "" && field.type === "group") {
-            Object.assign(values, makeEmptyForm(field.children));
-        } else if (field.type === "group") {
-            values[field.name] = makeEmptyForm(field.children);
-        } else {
-            values[field.name] = "-";
-        }
-    }
-    return values;
-}
-
-export function useFeatureUrl(feature, modelConf, mode = "edit") {
-    const slug = feature.properties[modelConf.lookup] || feature.id,
-        reverse = useReverse(),
-        authState = usePluginState("auth"),
-        perms =
-            authState &&
-            authState.config &&
-            authState.config.pages &&
-            authState.config.pages[modelConf.name];
-
-    if ((perms && perms.can_change) || mode !== "edit") {
-        return reverse(`${modelConf.name}_${mode}`, slug);
-    } else {
-        return null;
-    }
 }

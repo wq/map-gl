@@ -1,8 +1,16 @@
 import React from "react";
-import { useComponents } from "@wq/react";
+import { useComponents, withWQ, createFallbackComponents } from "@wq/react";
 import PropTypes from "prop-types";
+import Legend from "./Legend.js";
 
-export default function OverlayToggle({ name, legend, active, setActive }) {
+const OverlayToggleFallback = {
+    components: {
+        Legend,
+        ...createFallbackComponents(["ListItem", "Switch"], "@wq/material"),
+    },
+};
+
+function OverlayToggle({ name, legend, active, setActive }) {
     const { ListItem, Switch, Legend } = useComponents();
     return (
         <ListItem
@@ -31,3 +39,5 @@ OverlayToggle.propTypes = {
     active: PropTypes.bool,
     setActive: PropTypes.func,
 };
+
+export default withWQ(OverlayToggle, { fallback: OverlayToggleFallback });

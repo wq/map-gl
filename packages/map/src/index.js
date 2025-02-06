@@ -1,10 +1,7 @@
-import map from "./map.js";
 import {
-    useBasemapComponents,
-    useOverlayComponents,
-    useGeoTools,
-    useMapState,
-    useMapInstance,
+    useMapRootReducer,
+    useMapReducer,
+    MapReducerProvider,
     useGeoJSON,
     useGeometry,
     useFeatureCollection,
@@ -26,20 +23,11 @@ import {
     MapToolbar,
     Legend,
     LegendIcon,
-    GeoTools,
 } from "./components/index.js";
-import { Geo } from "./inputs/index.js";
-import { GeoHelp, GeoLocate, GeoCode, GeoCoords } from "./geotools/index.js";
-import { DefaultList, DefaultDetail, DefaultPopup } from "./views/index.js";
-
-export default map;
-
 export {
-    useBasemapComponents,
-    useOverlayComponents,
-    useGeoTools,
-    useMapState,
-    useMapInstance,
+    useMapRootReducer,
+    useMapReducer,
+    MapReducerProvider,
     useGeoJSON,
     useGeometry,
     useFeatureCollection,
@@ -59,13 +47,4 @@ export {
     MapToolbar,
     Legend,
     LegendIcon,
-    GeoTools,
-    Geo,
-    GeoHelp,
-    GeoLocate,
-    GeoCode,
-    GeoCoords,
-    DefaultList,
-    DefaultDetail,
-    DefaultPopup,
 };

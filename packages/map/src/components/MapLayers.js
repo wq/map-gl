@@ -1,42 +1,62 @@
 import React from "react";
+import { useComponents, withWQ, createFallbackComponents } from "@wq/react";
 import PropTypes from "prop-types";
 
-export default function MapLayers({ children }) {
+const MapLayerFallback = {
+    components: createFallbackComponents(
+        [
+            "Table",
+            "TableHead",
+            "TableTitle",
+            "TableBody",
+            "TableRow",
+            "TableCell",
+        ],
+        "@wq/material"
+    ),
+};
+
+function MapLayers({ children }) {
+    const { Table, TableHead, TableBody, TableRow, TableTitle } =
+        useComponents();
     return (
-        <table>
-            <thead>
-                <tr>
-                    <th>Group</th>
-                    <th>Name</th>
-                    <th>Active</th>
-                    <th>Detail</th>
-                </tr>
-            </thead>
-            <tbody>
+        <Table>
+            <TableHead>
+                <TableRow>
+                    <TableTitle>Group</TableTitle>
+                    <TableTitle>Name</TableTitle>
+                    <TableTitle>Active</TableTitle>
+                    <TableTitle>Detail</TableTitle>
+                </TableRow>
+            </TableHead>
+            <TableBody>
                 {React.Children.map(children, (element) => (
                     <MapLayer element={element} />
                 ))}
-            </tbody>
-        </table>
+            </TableBody>
+        </Table>
     );
 }
 MapLayers.propTypes = {
     children: PropTypes.node,
 };
 
+export default withWQ(MapLayers, { fallback: MapLayerFallback });
+
 export function MapLayer({ element }) {
     if (!element || !element.type) {
         return null;
     }
     const type = element.type.isAutoBasemap ? "Basemap" : "Overlay",
-        { name, active } = element.props;
+        { name, active } = element.props,
+        { TableRow, TableCell } = useComponents();
     return (
-        <tr>
-            <td>{type}</td>
-            <td>{name}</td>
-            <td>{active ? "Y" : "N"}</td>
-            <td>{element}</td>
-        </tr>
+        <TableRow>
+            <TableCell>{type}</TableCell>
+            <TableCell>{name}</TableCell>
+            <TableCell>{active ? "Y" : "N"}</TableCell>
+            <TableCell>{element}</TableCell>
+        </TableRow>
     );
 }
 

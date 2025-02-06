@@ -1,8 +1,16 @@
 import React from "react";
-import { useComponents } from "@wq/react";
+import { useComponents, withWQ, createFallbackComponents } from "@wq/react";
+import LegendIcon from "./LegendIcon.js";
 import PropTypes from "prop-types";
 
-export default function Legend({ legend }) {
+const LegendFallback = {
+    components: {
+        LegendIcon,
+        ...createFallbackComponents(["View", "Typography"], "@wq/material"),
+    },
+};
+
+function Legend({ legend }) {
     const { View, Typography, LegendIcon } = useComponents();
     return (
         <View>
@@ -30,3 +38,5 @@ export default function Legend({ legend }) {
 Legend.propTypes = {
     legend: PropTypes.object,
 };
+
+export default withWQ(Legend, { fallback: LegendFallback });

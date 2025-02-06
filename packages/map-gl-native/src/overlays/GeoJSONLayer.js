@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
-import { ShapeSource, Style } from "@maplibre/maplibre-react-native";
+import { ShapeSource } from "@maplibre/maplibre-react-native";
+import Style from "../../vendor/Style.js";
 import PropTypes from "prop-types";
 
 const types = ["symbol", "line", "fill", "circle"];

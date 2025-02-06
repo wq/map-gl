@@ -1,3 +1,4 @@
 import { Fragment } from "react";
+import { withWQ } from "@wq/react";
 
-export default Fragment;
+export default withWQ(Fragment, "MapLayers");
