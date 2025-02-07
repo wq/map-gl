@@ -1,15 +1,17 @@
-import React, { useMemo } from "react";
+import React, { useMemo, Fragment } from "react";
 import {
     useConfig,
     useComponents,
     withWQ,
     createFallbackComponents,
 } from "@wq/react";
-import { useRootMapReducer, MapReducerProvider } from "../hooks.js";
+import {
+    useRootMapReducer,
+    useMapReducer,
+    MapReducerProvider,
+} from "../hooks.js";
 import MapContainer from "./MapContainer.js";
 import MapToolbar from "./MapToolbar.js";
-import Map from "./Map.js";
-import MapLayers from "./MapLayers.js";
 import AutoOverlay from "./AutoOverlay.js";
 import PropTypes from "prop-types";
 
@@ -33,10 +35,16 @@ export const AutoMapFallback = {
     components: {
         MapContainer,
         MapToolbar,
-        Map,
-        MapLayers,
+        MapLayers: Fragment,
         ...createFallbackComponents(
-            ["MapInteraction", "MapAutoZoom", "MapIdentify", "Highlight"],
+            [
+                "Map",
+                "MapInteraction",
+                "MapAutoZoom",
+                "MapIdentify",
+                "Highlight",
+                "HighlightPopup",
+            ],
             "@wq/map-gl",
             "MapProvider"
         ),
@@ -46,6 +54,7 @@ export const AutoMapFallback = {
 export const AutoMapDefaults = {
     components: {
         AutoOverlay,
+        useMapReducer,
     },
 };
 
@@ -106,9 +115,11 @@ function AutoMap({
             MapLayers,
             AutoOverlay,
             Highlight,
+            HighlightPopup,
         } = useComponents(),
         { basemaps, overlays, initBounds, tiles, autoZoom, highlight } = state,
-        { showOverlay, hideOverlay, setBasemap } = actions;
+        { showOverlay, hideOverlay, setBasemap, setHighlight, clearHighlight } =
+            actions;
 
     const defaultTileSource = useMemo(() => {
         if (!tiles) {
@@ -176,6 +187,8 @@ function AutoMap({
                             name={name}
                             mapId={mapId}
                             context={context}
+                            overlays={overlays}
+                            setHighlight={setHighlight}
                         />
                     )}
                     <MapLayers>
@@ -191,9 +204,15 @@ function AutoMap({
                         ))}
                     </MapLayers>
                     {highlight && <Highlight data={highlight} />}
+                    <HighlightPopup
+                        inMap
+                        data={highlight}
+                        onClose={clearHighlight}
+                    />
                     {children}
                 </Map>
                 {toolbarAnchor.endsWith("right") && toolbar}
+                <HighlightPopup data={highlight} onClose={clearHighlight} />
             </MapContainer>
         </MapReducerProvider>
     );

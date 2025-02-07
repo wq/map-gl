@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { useStyleProp } from "@wq/map";
-import { Source, Layer } from "react-map-gl";
+import { useStyleProp } from "../hooks.js";
+import { Source, Layer } from "react-map-gl/maplibre";
 
 function AutoLayer({ id, active, before, layout = {}, paint = {}, ...rest }) {
     const layer = useMemo(() => {

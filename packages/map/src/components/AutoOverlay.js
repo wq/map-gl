@@ -6,21 +6,37 @@ import { useDataProps } from "../hooks.js";
 const AutoOverlayFallback = {
     components: {
         Text: createFallbackComponent("Text", "@wq/material"),
-        GeojsonOverlay({ url, data }) {
+        GeojsonOverlay({ name, url, data }) {
             const { Text } = useComponents();
             if (data) {
-                return <Text>GeoJSON {data.type}</Text>;
+                return (
+                    <Text>
+                        {name}: GeoJSON {data.type}
+                    </Text>
+                );
             } else {
-                return <Text>GeoJSON at {url}</Text>;
+                return (
+                    <Text>
+                        {name}: GeoJSON at {url}
+                    </Text>
+                );
             }
         },
-        TileOverlay({ url }) {
+        TileOverlay({ name, url }) {
             const { Text } = useComponents();
-            return <Text>Tile at {url}</Text>;
+            return (
+                <Text>
+                    {name}: Tile at {url}
+                </Text>
+            );
         },
-        VectorTileOverlay({ url }) {
+        VectorTileOverlay({ name, url }) {
             const { Text } = useComponents();
-            return <Text>Vector Tile at {url}</Text>;
+            return (
+                <Text>
+                    {name}: Vector Tile at {url}
+                </Text>
+            );
         },
     },
 };

@@ -1,15 +1,15 @@
-import Map from "./Map.js";
 import MapProvider from "./MapProvider.js";
+import Map from "./Map.js";
 import MapInteraction from "./MapInteraction.js";
 import MapAutoZoom from "./MapAutoZoom.js";
 import MapIdentify from "./MapIdentify.js";
-import MapLayers from "./MapLayers.js";
+import HighlightPopup from "./HighlightPopup.js";
 
 export {
-    Map,
     MapProvider,
+    Map,
     MapInteraction,
     MapAutoZoom,
     MapIdentify,
-    MapLayers,
+    HighlightPopup,
 };

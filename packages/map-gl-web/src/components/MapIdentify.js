@@ -1,11 +1,9 @@
 import { useEffect } from "react";
 import { useMapInstance } from "../hooks.js";
-import { usePluginReducer } from "@wq/react";
 import union from "@turf/union";
 
-export default function MapIdentify() {
-    const map = useMapInstance(),
-        [{ overlays }, { setHighlight }] = usePluginReducer("map");
+export default function MapIdentify({ overlays, setHighlight }) {
+    const map = useMapInstance();
 
     useEffect(() => {
         if (!map || map._alreadyConfiguredHandlers) {

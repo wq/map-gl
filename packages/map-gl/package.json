@@ -30,11 +30,10 @@
         "url": "https://github.com/wq/wq.app/issues"
     },
     "homepage": "https://wq.io/@wq/map-gl",
+    "dependencies": {
+        "@wq/map": "^3.0.0-a1-dev2.gf551259"
+    },
     "devDependencies": {
-        "@wq/map-gl-web": "^2.1.0",
-        "@wq/material-web": "^2.1.0",
-        "@wq/model": "^2.1.0",
-        "@wq/react": "^2.1.0",
-        "@wq/store": "^2.0.0"
+        "@wq/map-gl-web": "*"
     }
 }

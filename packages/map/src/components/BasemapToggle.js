@@ -1,8 +1,15 @@
 import React from "react";
-import { useComponents } from "@wq/react";
+import { useComponents, withWQ, createFallbackComponents } from "@wq/react";
 import PropTypes from "prop-types";
 
-export default function BasemapToggle({ name, active, setActive }) {
+const BasemapToggleFallback = {
+    components: createFallbackComponents(
+        ["ListItem", "RadioButton"],
+        "@wq/material"
+    ),
+};
+
+function BasemapToggle({ name, active, setActive }) {
     const { ListItem, RadioButton } = useComponents();
     return (
         <ListItem
@@ -29,3 +36,5 @@ BasemapToggle.propTypes = {
     active: PropTypes.bool,
     setActive: PropTypes.func,
 };
+
+export default withWQ(BasemapToggle, { fallback: BasemapToggleFallback });

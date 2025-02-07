@@ -1,44 +1,55 @@
 import React, { useMemo } from "react";
-import { Popup } from "react-map-gl";
-import {
-    HighlightPopup as ModalPopup,
-    HighlightContent,
-    computeBounds,
-} from "@wq/map";
-import { usePluginReducer } from "@wq/react";
-import { useMinWidth } from "@wq/material";
+import { Popup } from "react-map-gl/maplibre";
+import { useComponents, withWQ, createFallbackComponents } from "@wq/react";
+import centroid from "@turf/centroid";
+import PropTypes from "prop-types";
 
-export default function HighlightPopup({ inMap }) {
-    const showInMap = useMinWidth(600);
+const HighlightPopupFallback = {
+    components: {
+        useMinWidth(width) {
+            return window.screen.width >= width;
+        },
+    },
+};
+
+function HighlightPopup({ data, inMap, onClose }) {
+    const { useMinWidth } = useComponents(),
+        showInMap = useMinWidth(600);
     if (inMap && !showInMap) {
         return null;
     } else if (!inMap && showInMap) {
         return null;
     } else if (inMap) {
-        return <InMapPopup />;
+        return <InMapPopup data={data} onClose={onClose} />;
     } else {
-        return <ModalPopup />;
+        return <ModalPopupWQ data={data} onClose={onClose} />;
     }
 }
 
-export function InMapPopup() {
-    const [{ highlight }, { clearHighlight }] = usePluginReducer("map"),
-        [longitude, latitude] = useMemo(
-            () => findPoint(highlight),
-            [highlight]
-        );
-    if (!highlight || latitude === null || longitude === null) {
+export default withWQ(HighlightPopup, { fallback: HighlightPopupFallback });
+
+export function InMapPopup({ data, onClose }) {
+    const dataIsEmpty = !data || !data.features || data.features.length === 0,
+        [longitude, latitude] = useMemo(() => {
+            if (dataIsEmpty) {
+                return [null, null];
+            }
+            return centroid(data).geometry.coordinates;
+        }, [data]);
+
+    if (dataIsEmpty) {
         return null;
     }
+
     return (
         <Popup
             latitude={latitude}
             longitude={longitude}
-            onClose={clearHighlight}
+            onClose={onClose}
             maxWidth="80vw"
         >
             <div style={{ maxHeight: "40vh", overflowY: "auto" }}>
-                {highlight.features.map((feature) => (
+                {data.features.map((feature) => (
                     <HighlightContent
                         key={feature.id}
                         feature={feature}
@@ -50,23 +61,85 @@ export function InMapPopup() {
     );
 }
 
-function findPoint(highlight) {
-    if (!highlight || !highlight.features || !highlight.features.length) {
-        return [null, null];
-    }
-    const point = highlight.features.find(
-        (feature) => feature.geometry && feature.geometry.type === "Point"
-    );
+const ModalPopupFallback = {
+    components: createFallbackComponents(
+        ["Popup", "View", "ScrollView", "IconButton"],
+        "@wq/material"
+    ),
+};
 
-    if (point) {
-        return point.geometry.coordinates;
-    } else {
-        const bounds = computeBounds(highlight.features);
-        if (bounds) {
-            const [[minx, miny], [maxx, maxy]] = bounds;
-            return [(minx + maxx) / 2, (miny + maxy) / 2];
-        } else {
-            return [0, 0];
-        }
-    }
+function ModalPopup({ data, onClose }) {
+    const { Popup, View, ScrollView, IconButton } = useComponents(),
+        features = (data && data.features) || [];
+    return (
+        <View style={{ position: "absolute", bottom: 0 }}>
+            <Popup
+                open={features.length > 0}
+                onClose={onClose}
+                variant="persistent"
+            >
+                <IconButton
+                    icon="close"
+                    onClick={onClose}
+                    style={{
+                        position: "absolute",
+                        right: 0,
+                        top: 0,
+                        zIndex: 1,
+                    }}
+                />
+                <ScrollView style={{ maxHeight: "33vh" }}>
+                    {features.map((feature) => (
+                        <HighlightContentWQ
+                            key={feature.id}
+                            feature={feature}
+                        />
+                    ))}
+                </ScrollView>
+            </Popup>
+        </View>
+    );
 }
+
+const ModalPopupWQ = withWQ(ModalPopup, { fallback: ModalPopupFallback });
+
+export { ModalPopupWQ as ModalPopup };
+
+const HighlightContentFallback = {
+    components: {
+        Text({ children }) {
+            return <div>{children}</div>;
+        },
+        DefaultPopup({ feature: { id, properties = {} } }) {
+            const { Text } = useComponents();
+            const label = properties.label || properties.name || id;
+            return <Text>{label}</Text>;
+        },
+    },
+};
+
+function HighlightContent({ feature, inMap }) {
+    const popupName = feature.popup
+            ? `${feature.popup}-popup`
+            : "default-popup",
+        components = useComponents();
+
+    let View = components[popupName];
+    if (!View) {
+        console.warn(`No component named ${popupName}, using default.`);
+        View = components["default-popup"];
+    }
+
+    return <View feature={feature} inMap={inMap} />;
+}
+
+HighlightContent.propTypes = {
+    feature: PropTypes.object,
+    inMap: PropTypes.bool,
+};
+
+const HighlightContentWQ = withWQ(HighlightContent, {
+    fallback: HighlightContentFallback,
+});
+
+export { HighlightContentWQ as HighlightContent };

@@ -1,4 +1,4 @@
-import { contextFeature, contextFeatureCollection } from "../hooks.js";
+import { contextFeature, contextFeatureCollection } from "../index.js";
 
 test("context geojson fields", () => {
     expect(

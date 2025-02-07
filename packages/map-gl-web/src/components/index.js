@@ -3,8 +3,6 @@ import MapProvider from "./MapProvider.js";
 import MapInteraction from "./MapInteraction.js";
 import MapAutoZoom from "./MapAutoZoom.js";
 import MapIdentify from "./MapIdentify.js";
-import MapLayers from "./MapLayers.js";
-import GeoHelpIcon from "./GeoHelpIcon.js";
 import HighlightPopup from "./HighlightPopup.js";
 
 export {
@@ -13,7 +11,5 @@ export {
     MapInteraction,
     MapAutoZoom,
     MapIdentify,
-    MapLayers,
-    GeoHelpIcon,
     HighlightPopup,
 };
