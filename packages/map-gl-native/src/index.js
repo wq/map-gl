@@ -4,7 +4,7 @@ import {
     MapInteraction,
     MapAutoZoom,
     MapIdentify,
-    MapLayers,
+    HighlightPopup,
 } from "./components/index.js";
 import { Geojson, Highlight, VectorTile, Tile } from "./overlays/index.js";
 import {
@@ -20,11 +20,11 @@ export {
     MapInteraction,
     MapAutoZoom,
     MapIdentify,
-    MapLayers,
-    VectorTile,
-    Tile,
+    HighlightPopup,
     Geojson,
     Highlight,
+    VectorTile,
+    Tile,
     createMapInstance,
     useMapInstance,
     useGeolocation,

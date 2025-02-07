@@ -1,3 +1,4 @@
-import { MapProvider } from "react-map-gl";
+import { MapProvider } from "react-map-gl/maplibre";
+import { withWQ } from "@wq/react";
 
-export default MapProvider;
+export default withWQ(MapProvider);

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { computeBounds } from "@wq/map";
+import bbox from "@turf/bbox";
 import { useMapInstance } from "../hooks.js";
 
 export default function MapAutoZoom({
@@ -54,7 +54,10 @@ export default function MapAutoZoom({
                 allFeatures.push(...features);
             }
 
-            const bounds = computeBounds(allFeatures);
+            const bounds = bbox({
+                type: "FeatureCollection",
+                features: allFeatures,
+            });
             if (bounds) {
                 const elapsed = new Date() - startTime,
                     timeout = Math.max(wait * 1000 - elapsed, 0);

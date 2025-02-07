@@ -1,43 +1,47 @@
-import React, { useCallback, useState } from "react";
-import { usePlugin, usePluginReducer } from "@wq/react";
+import React, { useCallback, useState, useMemo } from "react";
+import { withWQ, useComponents } from "@wq/react";
 import PropTypes from "prop-types";
-import Root from "react-map-gl";
-import { findBasemapStyle } from "../util.js";
+import Root from "react-map-gl/maplibre";
+import { useBasemapStyle } from "../hooks.js";
 
-export default function Map({
+const MapFallback = {
+    components: {
+        useMapReducer() {
+            return [{ viewState: null }, { setViewState: null }];
+        },
+    },
+};
+
+function Map({
     mapId,
     initBounds,
     children,
-    mapProps,
-    containerStyle,
+    containerStyle: initContainerStyle,
+    basemap,
+    ...mapProps
 }) {
-    const { engine } = usePlugin("map-gl"),
+    const { useMapReducer } = useComponents(),
         [{ viewState: pluginViewState }, { setViewState: setPluginViewState }] =
-            usePluginReducer("map"),
+            useMapReducer(),
         [localViewState, setLocalViewState] = useState(null),
-        viewState = mapId ? pluginViewState : localViewState,
-        setViewState = mapId ? setPluginViewState : setLocalViewState,
+        viewState = pluginViewState || localViewState,
+        setViewState = setPluginViewState || setLocalViewState,
         onMove = useCallback(
             (evt) => setViewState(evt.viewState),
             [setViewState]
         ),
-        style = findBasemapStyle(children);
-
-    containerStyle = {
-        flex: "1",
-        minHeight: 200,
-        ...containerStyle,
-    };
-
-    if (!engine) {
-        throw new Error(
-            "Must pass maplibre-gl or mapbox-gl to mapgl.setEngine()!  See https://wq.io/@wq/map-gl"
+        style = useBasemapStyle(basemap),
+        containerStyle = useMemo(
+            () => ({
+                flex: "1",
+                minHeight: 200,
+                ...initContainerStyle,
+            }),
+            [initContainerStyle]
         );
-    }
 
     return (
         <Root
-            mapLib={engine}
             id={mapId}
             reuseMaps={Boolean(mapId)}
             mapStyle={style}
@@ -58,4 +62,7 @@ Map.propTypes = {
     children: PropTypes.node,
     mapProps: PropTypes.object,
     containerStyle: PropTypes.object,
+    basemap: PropTypes.object,
 };
+
+export default withWQ(Map, { fallback: MapFallback });

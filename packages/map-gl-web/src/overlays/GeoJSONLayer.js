@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Source, Layer } from "react-map-gl";
+import { Source, Layer } from "react-map-gl/maplibre";
 import PropTypes from "prop-types";
 
 const types = ["symbol", "line", "fill", "circle"];
