@@ -61,11 +61,11 @@ export const AutoMapDefaults = {
 function AutoMap({
     name,
     mapId,
-    toolbar = true,
+    toolbar: Toolbar = true,
     toolbarAnchor = "top-right",
     containerStyle,
     context = {},
-    overlays: initialOverlays = [],
+    overlays: initialOverlays = null,
     basemaps: initialBasemaps = null,
     initBounds: initialInitBounds = null,
     tiles: initialTiles = null,
@@ -104,8 +104,9 @@ function AutoMap({
             onChangeBasemap,
             onChangeOverlays
         ),
-        [state, actions] = reducer,
-        {
+        [state, actions] = reducer;
+
+    const {
             MapContainer,
             MapToolbar,
             Map,
@@ -143,26 +144,31 @@ function AutoMap({
 
     const identify = overlays.some((overlay) => !!overlay.popup);
 
-    if (toolbar === true) {
-        toolbar = (
-            <MapToolbar
-                name={name}
-                mapId={mapId}
-                basemaps={basemaps}
-                overlays={overlays}
-                showOverlay={showOverlay}
-                hideOverlay={hideOverlay}
-                setBasemap={setBasemap}
-                context={context}
-                anchor={toolbarAnchor}
-            />
-        );
-    } else if (!toolbar) {
-        toolbar = false;
-    }
+    const toolbar = (() => {
+        const toolbarProps = {
+            name,
+            mapId,
+            basemaps,
+            overlays,
+            showOverlay,
+            hideOverlay,
+            setBasemap,
+            context,
+            anchor: toolbarAnchor,
+        };
+        if (Toolbar === true) {
+            return <MapToolbar {...toolbarProps} />;
+        } else if (typeof Toolbar === "function") {
+            return <Toolbar {...toolbarProps} />;
+        } else if (!Toolbar) {
+            return false;
+        } else {
+            return Toolbar;
+        }
+    })();
 
     return (
-        <MapReducerProvider value={reducer}>
+        <MapReducerProvider state={state} actions={actions}>
             <MapContainer name={name} mapId={mapId}>
                 {toolbarAnchor.endsWith("left") && toolbar}
                 <Map

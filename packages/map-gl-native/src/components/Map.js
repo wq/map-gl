@@ -1,20 +1,16 @@
-import React, { useMemo, useContext, useRef, useCallback } from "react";
+import React, { useMemo, useContext, useRef, useState, useEffect } from "react";
 import { MapView, Camera } from "@maplibre/maplibre-react-native";
 import { MapContext } from "./MapProvider.js";
 import { withWQ } from "@wq/react";
 import { useBasemapStyle } from "../hooks.js";
 import PropTypes from "prop-types";
 
-function Map({
-    name,
-    initBounds,
-    children,
-    containerStyle,
-    basemap,
-    ...mapProps
-}) {
+function Map({ initBounds, children, containerStyle, basemap, ...mapProps }) {
     const { setInstance } = useContext(MapContext),
         fitBounds = useMemo(() => {
+            if (!initBounds) {
+                return null;
+            }
             const [[xmin, ymin], [xmax, ymax]] = initBounds;
             return { sw: [xmin, ymin], ne: [xmax, ymax] };
         }, [initBounds]),
@@ -29,27 +25,12 @@ function Map({
 
     const mapRef = useRef(),
         cameraRef = useRef(),
-        mapInstance = useMemo(() => createMapInstance(mapRef, cameraRef), []),
-        onInit = useCallback(
-            () => setInstance(mapInstance, name),
-            [setInstance, mapInstance]
+        [cameraProps, setCameraProps] = useState({}),
+        mapInstance = useMemo(
+            () => createMapInstance(mapRef, cameraRef, setCameraProps),
+            []
         ),
-        onPress = useCallback(
-            (e) => {
-                if (mapInstance.handlers.click) {
-                    mapInstance.handlers.click(e);
-                }
-            },
-            [mapInstance]
-        ),
-        onMove = useCallback(
-            (e) => {
-                if (mapInstance.handlers.move) {
-                    mapInstance.handlers.move(e);
-                }
-            },
-            [mapInstance]
-        );
+        { handleClick, handleMove } = mapInstance;
 
     let rotateEnabled, pitchEnabled;
     if (mapProps.rotateEnabled !== undefined) {
@@ -67,6 +48,11 @@ function Map({
         pitchEnabled = rotateEnabled;
     }
 
+    useEffect(() => {
+        setInstance(mapInstance);
+        return () => setInstance(null);
+    }, [mapRef.current]);
+
     return (
         <MapView
             ref={mapRef}
@@ -76,12 +62,17 @@ function Map({
             attributionEnabled={false}
             logoEnabled={false}
             style={style}
-            onPress={onPress}
-            onWillStartLoadingMap={onInit}
-            onRegionDidChange={onMove}
+            onPress={handleClick}
+            onRegionDidChange={handleMove}
             {...mapProps}
         >
-            <Camera ref={cameraRef} bounds={fitBounds} animationDuration={0} />
+            <Camera
+                ref={cameraRef}
+                defaultSettings={{
+                    bounds: fitBounds,
+                }}
+                {...cameraProps}
+            />
             {children}
         </MapView>
     );
@@ -98,17 +89,36 @@ Map.propTypes = {
 export default withWQ(Map);
 
 // Mimic some functions from maplibre-gl-js & react-map-gl
-export function createMapInstance(mapRef, cameraRef) {
-    return {
-        handlers: {},
+export function createMapInstance(mapRef, cameraRef, setCameraProps) {
+    const instance = {
+        handlers: {
+            click: [],
+            move: [],
+        },
         on(event, handler) {
-            if (!["click", "move"].includes(event)) {
+            if (!(event in this.handlers)) {
                 console.warn("Unsupported event: " + event);
             }
-            this.handlers[event] = handler;
+            this.handlers[event].push(handler);
         },
-        off(event) {
-            delete this.handlers[event];
+        off(event, handler) {
+            if (!(event in this.handlers)) {
+                console.warn("Unsupported event: " + event);
+            }
+            this.handlers[event] = this.handlers[event].filter(
+                (h) => h !== handler
+            );
+        },
+        _runHandlers(event, e) {
+            for (const handler of this.handlers[event]) {
+                handler(e);
+            }
+        },
+        handleClick(e) {
+            this._runHandlers("click", e);
+        },
+        handleMove(e) {
+            this._runHandlers("move", e);
         },
         flyTo({ center, zoom }) {
             this.getCamera()?.flyTo(center, zoom);
@@ -130,5 +140,11 @@ export function createMapInstance(mapRef, cameraRef) {
         getCamera() {
             return cameraRef.current;
         },
+        setCameraProps,
     };
+
+    instance.handleClick = instance.handleClick.bind(instance);
+    instance.handleMove = instance.handleMove.bind(instance);
+
+    return instance;
 }

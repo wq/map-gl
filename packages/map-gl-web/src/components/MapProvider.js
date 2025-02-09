@@ -1,4 +1,27 @@
 import { MapProvider } from "react-map-gl/maplibre";
 import { withWQ } from "@wq/react";
+import Map from "./Map.js";
+import MapInteraction from "./MapInteraction.js";
+import MapAutoZoom from "./MapAutoZoom.js";
+import MapIdentify from "./MapIdentify.js";
+import HighlightPopup from "./HighlightPopup.js";
+import Geojson from "../overlays/Geojson.js";
+import Tile from "../overlays/Tile.js";
+import VectorTile from "../overlays/VectorTile.js";
+import Highlight from "../overlays/Highlight.js";
 
-export default withWQ(MapProvider);
+const MapProviderDefaults = {
+    components: {
+        Map,
+        MapInteraction,
+        MapAutoZoom,
+        MapIdentify,
+        HighlightPopup,
+        Geojson,
+        Tile,
+        VectorTile,
+        Highlight,
+    },
+};
+
+export default withWQ(MapProvider, { defaults: MapProviderDefaults });

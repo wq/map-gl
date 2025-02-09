@@ -15,21 +15,21 @@ const emptyState = {
     basemaps: [],
     overlays: [],
     viewState: null,
-    initBounds: null,
+    initBounds: undefined,
     tiles: null,
     autoZoom: null,
     highlight: null,
     mapId: null,
     activeBasemap: null,
-    activeOverlays: [],
+    activeOverlays: null,
 };
 
 export default function reducer(state = emptyState, action) {
     switch (action.type) {
         case MAP_INITIALIZE: {
             const {
-                basemaps,
-                overlays,
+                basemaps: initBasemaps,
+                overlays: initOverlays,
                 viewState,
                 initBounds,
                 tiles,
@@ -39,9 +39,11 @@ export default function reducer(state = emptyState, action) {
                 activeBasemap,
                 activeOverlays,
             } = { ...emptyState, ...action.payload };
+            const basemaps = reduceBasemaps([], initBasemaps, activeBasemap),
+                overlays = reduceOverlays([], initOverlays, activeOverlays);
             return {
-                basemaps: reduceBasemaps([], basemaps, activeBasemap),
-                overlays: reduceOverlays([], overlays, activeOverlays),
+                basemaps,
+                overlays,
                 viewState,
                 initBounds,
                 tiles,
@@ -224,6 +226,11 @@ function reduceOverlays(lastOverlays, nextOverlays, activeOverlays) {
             return {
                 ...overlay,
                 active: true,
+            };
+        } else if (activeOverlays && !activeOverlays.includes(overlay.name)) {
+            return {
+                ...overlay,
+                active: false,
             };
         } else if (overlay.active) {
             return {
