@@ -24,8 +24,8 @@ export function useRootMapReducer(
     const [state, dispatch] = useReducer(
         (state, action) => reducer(state, action),
         {
-            basemaps,
-            overlays,
+            basemaps: basemaps || [],
+            overlays: overlays || [],
             initBounds,
             tiles,
             autoZoom,
