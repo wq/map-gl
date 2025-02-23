@@ -4,6 +4,7 @@ import Map from "./Map.js";
 import MapInteraction from "./MapInteraction.js";
 import MapAutoZoom from "./MapAutoZoom.js";
 import MapIdentify from "./MapIdentify.js";
+import HighlightPopup from "./HighlightPopup.js";
 import Geojson from "../overlays/Geojson.js";
 import Tile from "../overlays/Tile.js";
 import VectorTile from "../overlays/VectorTile.js";
@@ -15,6 +16,7 @@ const MapProviderDefaults = {
         MapInteraction,
         MapAutoZoom,
         MapIdentify,
+        HighlightPopup,
         Geojson,
         Tile,
         VectorTile,
