@@ -1,5 +1,5 @@
+import MapProvider from "./MapProvider.js";
 import {
-    MapProvider,
     Map,
     MapInteraction,
     MapAutoZoom,

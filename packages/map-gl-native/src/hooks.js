@@ -1,9 +1,7 @@
-import { useContext } from "react";
-import { MapContext } from "./components/MapProvider.js";
-import { createMapInstance } from "./components/Map.js";
+import { createContext, useContext } from "react";
 import * as Location from "expo-location";
 
-export { createMapInstance };
+export const MapContext = createContext({ instance: null, setInstance() {} });
 
 export function useMapInstance() {
     const { instance } = useContext(MapContext) || {};

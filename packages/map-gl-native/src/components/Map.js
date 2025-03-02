@@ -1,8 +1,7 @@
 import React, { useMemo, useContext, useRef, useState, useEffect } from "react";
 import { MapView, Camera } from "@maplibre/maplibre-react-native";
-import { MapContext } from "./MapProvider.js";
 import { withWQ } from "@wq/react";
-import { useBasemapStyle } from "../hooks.js";
+import { MapContext, useBasemapStyle } from "../hooks.js";
 import PropTypes from "prop-types";
 
 function Map({ initBounds, children, containerStyle, basemap, ...mapProps }) {
