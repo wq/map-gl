@@ -1,5 +1,5 @@
 import {
-    useMapRootReducer,
+    useRootMapReducer,
     useMapReducer,
     MapReducerProvider,
     useGeoJSON,
@@ -21,7 +21,7 @@ import {
     LegendIcon,
 } from "./components/index.js";
 export {
-    useMapRootReducer,
+    useRootMapReducer,
     useMapReducer,
     MapReducerProvider,
     useGeoJSON,
