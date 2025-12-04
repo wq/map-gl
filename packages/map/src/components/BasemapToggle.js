@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 const BasemapToggleFallback = {
     components: createFallbackComponents(
         ["ListItem", "RadioButton"],
-        "@wq/material"
+        "@wq/material",
     ),
 };
 

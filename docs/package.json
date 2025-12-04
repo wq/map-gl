@@ -1,0 +1,30 @@
+{
+    "name": "@wq/map-gl-docs",
+    "version": "0.0.1",
+    "private": true,
+    "description": "@wq/map-gl docs",
+    "author": "S. Andrew Sheppard",
+    "keywords": [
+        "gatsby"
+    ],
+    "scripts": {
+        "develop": "gatsby develop",
+        "start": "gatsby develop",
+        "build": "gatsby build",
+        "serve": "gatsby serve",
+        "clean": "gatsby clean"
+    },
+    "dependencies": {
+        "@emotion/react": "^11.14.0",
+        "@emotion/styled": "^11.14.1",
+        "@wq/gatsby-components": "^0.1.0",
+        "@wq/material": "^3.0.0-alpha.0",
+        "@wq/material-web": "^3.0.0-alpha.0",
+        "gatsby": "^5.14.6",
+        "gatsby-plugin-emotion": "^8.15.0",
+        "gatsby-plugin-mdx": "^5.15.0",
+        "gatsby-source-filesystem": "^5.15.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
+    }
+}

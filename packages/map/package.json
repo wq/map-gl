@@ -1,7 +1,7 @@
 {
     "name": "@wq/map",
-    "version": "2.1.0",
-    "description": "GIS integration for @wq/app pages",
+    "version": "3.0.0-alpha.0",
+    "description": "GIS integration for @wq/material",
     "type": "module",
     "main": "index.js",
     "react-native": "src/index.js",
@@ -25,10 +25,10 @@
     "author": "S. Andrew Sheppard",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/wq/wq.app/issues"
+        "url": "https://github.com/wq/map-gl/issues"
     },
-    "homepage": "https://wq.io/@wq/map",
+    "homepage": "https://map-gl.wq.io/@wq/map",
     "dependencies": {
-        "@wq/react": "^3.0.0-a1-dev1.g760eb56"
+        "@wq/react": "^3.0.0-alpha.0"
     }
 }

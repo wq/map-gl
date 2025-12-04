@@ -1,6 +1,6 @@
 {
     "name": "@wq/map-gl",
-    "version": "2.1.0",
+    "version": "3.0.0-alpha.0",
     "description": "MapLibre GL integration for @wq/map",
     "type": "module",
     "main": "src/index.js",
@@ -27,13 +27,13 @@
     "author": "S. Andrew Sheppard",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/wq/wq.app/issues"
+        "url": "https://github.com/wq/map-gl/issues"
     },
     "homepage": "https://wq.io/@wq/map-gl",
     "dependencies": {
-        "@wq/map": "^3.0.0-a1-dev2.gf551259"
+        "@wq/map": "^3.0.0-alpha.0"
     },
     "devDependencies": {
-        "@wq/map-gl-web": "*"
+        "@wq/map-gl-web": "^3.0.0-alpha.0"
     }
 }

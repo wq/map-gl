@@ -46,7 +46,7 @@ export const AutoMapFallback = {
                 "HighlightPopup",
             ],
             "@wq/map-gl",
-            "MapProvider"
+            "MapProvider",
         ),
     },
 };
@@ -102,7 +102,7 @@ function AutoMap({
                 activeOverlays,
             },
             onChangeBasemap,
-            onChangeOverlays
+            onChangeOverlays,
         ),
         [state, actions] = reducer;
 

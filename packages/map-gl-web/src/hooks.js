@@ -14,7 +14,7 @@ export function useGeolocation() {
             return navigator.geolocation.watchPosition(
                 onPosition,
                 onError,
-                options
+                options,
             );
         },
         clearWatch(watchId) {
@@ -35,7 +35,7 @@ export function useBasemapStyle(basemap) {
         const urls = [];
         if (basemap.url.match("{s}")) {
             (basemap.subdomains || ["a", "b", "c"]).forEach((s) =>
-                urls.push(basemap.url.replace("{s}", s))
+                urls.push(basemap.url.replace("{s}", s)),
             );
         } else {
             urls.push(basemap.url);

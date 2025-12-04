@@ -28,7 +28,7 @@ function Map({
         setViewState = setPluginViewState || setLocalViewState,
         onMove = useCallback(
             (evt) => setViewState(evt.viewState),
-            [setViewState]
+            [setViewState],
         ),
         style = useBasemapStyle(basemap),
         containerStyle = useMemo(
@@ -37,7 +37,7 @@ function Map({
                 minHeight: 200,
                 ...initContainerStyle,
             }),
-            [initContainerStyle]
+            [initContainerStyle],
         );
 
     return (

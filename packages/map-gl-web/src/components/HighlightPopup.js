@@ -64,7 +64,7 @@ export function InMapPopup({ data, onClose }) {
 const ModalPopupFallback = {
     components: createFallbackComponents(
         ["Popup", "View", "ScrollView", "IconButton"],
-        "@wq/material"
+        "@wq/material",
     ),
 };
 

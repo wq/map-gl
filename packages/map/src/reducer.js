@@ -72,13 +72,13 @@ export default function reducer(state = emptyState, action) {
                 overlays: reduceOverlays(
                     state.overlays,
                     state.overlays,
-                    activeOverlays
+                    activeOverlays,
                 ),
             };
         }
         case MAP_HIDE_OVERLAY: {
             const activeOverlays = state.activeOverlays.filter(
-                (o) => o !== action.payload
+                (o) => o !== action.payload,
             );
             return {
                 ...state,
@@ -86,7 +86,7 @@ export default function reducer(state = emptyState, action) {
                 overlays: reduceOverlays(
                     state.overlays,
                     state.overlays,
-                    activeOverlays
+                    activeOverlays,
                 ),
             };
         }
@@ -97,7 +97,7 @@ export default function reducer(state = emptyState, action) {
                 basemaps: reduceBasemaps(
                     state.basemaps,
                     state.basemaps,
-                    action.payload
+                    action.payload,
                 ),
             };
         case MAP_SET_HIGHLIGHT:
@@ -112,7 +112,7 @@ export default function reducer(state = emptyState, action) {
             const features = {};
             let hasNew = false;
             state.highlight.features.forEach(
-                (feature) => (features[feature.id] = feature)
+                (feature) => (features[feature.id] = feature),
             );
             action.payload.features.forEach((feature) => {
                 if (!features[feature.id]) {
@@ -137,7 +137,7 @@ export default function reducer(state = emptyState, action) {
             }
             const features = {};
             state.highlight.features.forEach(
-                (feature) => (features[feature.id] = feature)
+                (feature) => (features[feature.id] = feature),
             );
 
             action.payload.features.forEach((feature) => {
@@ -162,7 +162,7 @@ export default function reducer(state = emptyState, action) {
             }
             const remove = {};
             action.payload.features.forEach(
-                (feature) => (remove[feature.id] = true)
+                (feature) => (remove[feature.id] = true),
             );
 
             return {
@@ -170,7 +170,7 @@ export default function reducer(state = emptyState, action) {
                 highlight: checkEmpty({
                     type: "FeatureCollection",
                     features: state.highlight.features.filter(
-                        (feature) => !remove[feature.id]
+                        (feature) => !remove[feature.id],
                     ),
                 }),
             };
@@ -256,7 +256,7 @@ function sameLayers(arr1, arr2) {
     }
     return arr1.every(
         (layer, i) =>
-            layer.name === arr2[i].name && layer.active === arr2[i].active
+            layer.name === arr2[i].name && layer.active === arr2[i].active,
     );
 }
 

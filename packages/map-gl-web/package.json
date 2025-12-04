@@ -1,6 +1,6 @@
 {
     "name": "@wq/map-gl-web",
-    "version": "2.1.0",
+    "version": "3.0.0-alpha.0",
     "description": "Web bindings for for @wq/map-gl",
     "type": "module",
     "main": "index.js",
@@ -27,14 +27,14 @@
     "author": "S. Andrew Sheppard",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/wq/wq.app/issues"
+        "url": "https://github.com/wq/map-gl/issues"
     },
-    "homepage": "https://wq.io/@wq/map-gl",
+    "homepage": "https://map-gl.wq.io/@wq/map-gl",
     "dependencies": {
-        "@turf/bbox": "^7.2.0",
-        "@turf/centroid": "^7.2.0",
-        "@turf/union": "^7.2.0",
-        "@wq/react": "^3.0.0-a1-dev1.g760eb56",
-        "react-map-gl": "^8.0.1"
+        "@turf/bbox": "^7.3.1",
+        "@turf/centroid": "^7.3.1",
+        "@turf/union": "^7.3.1",
+        "@wq/react": "^3.0.0-alpha.0",
+        "react-map-gl": "^8.1.0"
     }
 }

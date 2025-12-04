@@ -19,7 +19,7 @@ export function useRootMapReducer(
         activeBasemap,
     },
     onChangeBasemap,
-    onChangeOverlays
+    onChangeOverlays,
 ) {
     const [state, dispatch] = useReducer(
         (state, action) => reducer(state, action),
@@ -31,7 +31,7 @@ export function useRootMapReducer(
             autoZoom,
             activeOverlays,
             activeBasemap,
-        }
+        },
     );
     const boundActions = useMemo(() => {
         const boundActions = {};
@@ -139,7 +139,7 @@ function contextGeometry(context, fieldName) {
             return {
                 type: "GeometryCollection",
                 geometries: list.map((row) =>
-                    contextGeometry(row, rest.join("."))
+                    contextGeometry(row, rest.join(".")),
                 ),
             };
         } else {
@@ -213,7 +213,7 @@ export function useGeoJSON(url, data) {
             },
             function () {
                 setGeojson(null);
-            }
+            },
         );
     }, [url, data]);
 

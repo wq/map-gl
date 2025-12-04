@@ -1,7 +1,6 @@
 /index.js
-/util.js
 /hooks.js
+/MapProvider.js
 /components/
-/basemaps/
 /overlays/
 /__tests__/

@@ -1,0 +1,65 @@
+---
+title: npm Packages
+icon: npm-package
+section: Packages
+---
+
+# npm Packages
+
+<PackagesTable />
+
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Link,
+} from "@wq/material";
+import { usePages } from "@wq/gatsby-components";
+
+export function PackagesTable() {
+    const folder = usePages()
+        .find((s) => s.name == "Packages")
+        ?.pages.find((s) => s.title == "npm Packages");
+    const pages = folder
+        ? folder.pages.filter((page) => page.url !== folder.url)
+        : [];
+    return (
+        <Table>
+            <TableHead>
+                <TableRow>
+                    <TableCell>Package</TableCell>
+                    <TableCell>Source</TableCell>
+                    <TableCell>NPM</TableCell>
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                {pages.map((pkg) => (
+                    <TableRow key={pkg.title}>
+                        <TableCell>
+                            <Link to={pkg.url}>{pkg.title}</Link>
+                        </TableCell>
+                        <TableCell>
+                            <Link
+                                href={`https://github.com/wq/map-gl/blob/main/packages/${pkg.url.replace(/^\/@wq\//, "")}`}
+                            >
+                                GitHub
+                            </Link>
+                        </TableCell>
+                        <TableCell>
+                            <Link
+                                href={`https://www.npmjs.com/package${pkg.url}`}
+                            >
+                                NPM
+                            </Link>
+                        </TableCell>
+                    </TableRow>
+                ))}
+            </TableBody>
+        </Table>
+    );
+}
+
+export { default, Head } from "../../components/Layout.jsx";

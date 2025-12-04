@@ -10,7 +10,7 @@ const MapToolbarFallback = {
         BasemapToggle,
         ...createFallbackComponents(
             ["SidePanel", "List", "ListSubheader"],
-            "@wq/material"
+            "@wq/material",
         ),
     },
 };

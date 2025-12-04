@@ -62,7 +62,7 @@ function getIdentifyLayers(overlay) {
     }
     if (overlay.type === "geojson") {
         return ["symbol", "line", "fill", "fill-extrusion", "circle"].map(
-            (type) => `${overlay.name}-${type}`
+            (type) => `${overlay.name}-${type}`,
         );
     } else if (overlay.type === "vector-tile") {
         return ((overlay.style || {}).layers || []).map((layer) => layer.id);

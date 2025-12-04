@@ -11,8 +11,8 @@ test("context geojson fields", () => {
                     },
                 ],
             },
-            "geometry"
-        )
+            "geometry",
+        ),
     ).toEqual({
         type: "FeatureCollection",
         features: [
@@ -34,8 +34,8 @@ test("context geojson fields", () => {
                 id: "one",
                 geometry: { type: "Point", coordinates: [0, 0] },
             },
-            "geometry"
-        )
+            "geometry",
+        ),
     ).toEqual({
         type: "Feature",
         id: "one",
@@ -62,8 +62,8 @@ test("context geojson fields", () => {
                     },
                 ],
             },
-            "general.geometry"
-        )
+            "general.geometry",
+        ),
     ).toEqual({
         type: "FeatureCollection",
         features: [
@@ -110,8 +110,8 @@ test("context geojson fields", () => {
             {
                 list: [itemWithObservations],
             },
-            "observations[].location"
-        )
+            "observations[].location",
+        ),
     ).toEqual({
         type: "FeatureCollection",
         features: [
