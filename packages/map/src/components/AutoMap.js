@@ -24,12 +24,7 @@ export const AutoMapFallback = {
                 [180, 90],
             ],
             tiles: null,
-            autoZoom: {
-                wait: 0.5, // How long to wait before triggering autoZoom
-                // Settings for fitBounds
-                maxZoom: 13,
-                animate: true,
-            },
+            autoZoom: null,
         },
     },
     components: {
@@ -251,17 +246,16 @@ export default withWQ(AutoMap, {
 
 // Default base map configuration - override to customize
 function _defaultBasemaps() {
-    var cdn =
-        "https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg";
-    var attr =
-        'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.';
-
     return [
         {
-            name: "Stamen Terrain",
-            type: "tile",
-            url: cdn,
-            attribution: attr,
+            name: "Globe",
+            type: "vector-tile",
+            url: "https://demotiles.maplibre.org/globe.json",
+        },
+        {
+            name: "Web Mercator",
+            type: "vector-tile",
+            url: "https://demotiles.maplibre.org/style.json",
         },
     ];
 }

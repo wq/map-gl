@@ -65,8 +65,23 @@ function getIdentifyLayers(overlay) {
             (type) => `${overlay.name}-${type}`,
         );
     } else if (overlay.type === "vector-tile") {
-        return ((overlay.style || {}).layers || []).map((layer) => layer.id);
-    } else {
-        return [];
+        if (overlay.style) {
+            return (overlay.style.layers || []).map((layer) => layer.id);
+        } else if (overlay.layer) {
+            const layerId =
+                typeof overlay.layer === "string"
+                    ? overlay.layer
+                    : overlay.layer.id;
+            if (overlay.icon) {
+                return [layerId];
+            } else {
+                return [
+                    `${layerId}-fill`,
+                    `${layerId}-line`,
+                    `${layerId}-circle`,
+                ];
+            }
+        }
     }
+    return [];
 }

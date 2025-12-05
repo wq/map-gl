@@ -27,7 +27,7 @@ function Map({ initBounds, children, containerStyle, basemap, ...mapProps }) {
         [cameraProps, setCameraProps] = useState({}),
         mapInstance = useMemo(
             () => createMapInstance(mapRef, cameraRef, setCameraProps),
-            []
+            [],
         ),
         { handleClick, handleMove } = mapInstance;
 
@@ -105,7 +105,7 @@ export function createMapInstance(mapRef, cameraRef, setCameraProps) {
                 console.warn("Unsupported event: " + event);
             }
             this.handlers[event] = this.handlers[event].filter(
-                (h) => h !== handler
+                (h) => h !== handler,
             );
         },
         _runHandlers(event, e) {
@@ -130,7 +130,7 @@ export function createMapInstance(mapRef, cameraRef, setCameraProps) {
                 bounds[0],
                 bounds[1],
                 padding,
-                duration
+                duration,
             );
         },
         getMap() {

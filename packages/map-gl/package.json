@@ -1,6 +1,6 @@
 {
     "name": "@wq/map-gl",
-    "version": "3.0.0-alpha.0",
+    "version": "3.0.0-alpha.1",
     "description": "MapLibre GL integration for @wq/map",
     "type": "module",
     "main": "src/index.js",
@@ -31,9 +31,9 @@
     },
     "homepage": "https://wq.io/@wq/map-gl",
     "dependencies": {
-        "@wq/map": "^3.0.0-alpha.0"
+        "@wq/map": "^3.0.0-alpha.1"
     },
     "devDependencies": {
-        "@wq/map-gl-web": "^3.0.0-alpha.0"
+        "@wq/map-gl-web": "^3.0.0-alpha.1"
     }
 }

@@ -9,12 +9,16 @@ const HighlightPopupFallback = {
         useMinWidth(width) {
             return window.screen.width >= width;
         },
+        useShowInMap() {
+            const { useMinWidth } = useComponents();
+            return useMinWidth(600);
+        },
     },
 };
 
 function HighlightPopup({ data, inMap, onClose }) {
-    const { useMinWidth } = useComponents(),
-        showInMap = useMinWidth(600);
+    const { useShowInMap } = useComponents(),
+        showInMap = useShowInMap();
     if (inMap && !showInMap) {
         return null;
     } else if (!inMap && showInMap) {
@@ -50,7 +54,7 @@ export function InMapPopup({ data, onClose }) {
         >
             <div style={{ maxHeight: "40vh", overflowY: "auto" }}>
                 {data.features.map((feature) => (
-                    <HighlightContent
+                    <HighlightContentWQ
                         key={feature.id}
                         feature={feature}
                         inMap
@@ -119,9 +123,10 @@ const HighlightContentFallback = {
 };
 
 function HighlightContent({ feature, inMap }) {
-    const popupName = feature.popup
-            ? `${feature.popup}-popup`
-            : "default-popup",
+    const popupName =
+            feature.popup && feature.popup !== true
+                ? feature.popup
+                : "default-popup",
         components = useComponents();
 
     let View = components[popupName];

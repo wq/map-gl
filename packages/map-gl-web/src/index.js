@@ -5,6 +5,9 @@ import {
     MapAutoZoom,
     MapIdentify,
     HighlightPopup,
+    InMapPopup,
+    ModalPopup,
+    HighlightContent,
 } from "./components/index.js";
 
 import { Geojson, Highlight, VectorTile, Tile } from "./overlays/index.js";
@@ -23,6 +26,9 @@ export {
     MapAutoZoom,
     MapIdentify,
     HighlightPopup,
+    InMapPopup,
+    ModalPopup,
+    HighlightContent,
     Geojson,
     Highlight,
     VectorTile,

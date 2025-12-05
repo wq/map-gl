@@ -282,6 +282,16 @@ export function asFeatureCollection(geojson) {
     if (!geojson || !geojson.type) {
         return geojson;
     }
+    if (geojson.type === "FeatureCollection") {
+        return geojson;
+    }
+    if (geojson.type === "Feature") {
+        return {
+            type: "FeatureCollection",
+            features: [geojson],
+        };
+    }
+
     const geometry = asGeometry(geojson);
 
     if (!geometry) {

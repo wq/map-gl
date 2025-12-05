@@ -8,6 +8,7 @@ export default function MapAutoZoom({
     wait,
     maxZoom,
     animate,
+    sources: filterSources,
 }) {
     const map = useMapInstance(mapId);
 
@@ -24,6 +25,9 @@ export default function MapAutoZoom({
             const sources = map.getStyle().sources,
                 allFeatures = [];
             for (const name in sources) {
+                if (filterSources && !filterSources.includes(name)) {
+                    continue;
+                }
                 const source = sources[name];
                 if (source.type !== "geojson") {
                     continue;

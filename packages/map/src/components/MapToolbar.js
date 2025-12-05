@@ -26,12 +26,10 @@ function MapToolbar({
 }) {
     const { SidePanel, List, ListSubheader, OverlayToggle, BasemapToggle } =
             useComponents(),
-        hasMultipleOverlays =
-            overlays &&
-            (overlays.length > 1 || overlays.some((conf) => conf.legend)),
+        hasAnyOverlays = overlays && overlays.length > 0,
         hasMultipleBasemaps = basemaps && basemaps.length > 1;
 
-    if (!hasMultipleOverlays && !hasMultipleBasemaps) {
+    if (!hasAnyOverlays && !hasMultipleBasemaps) {
         return null;
     }
 
@@ -39,7 +37,7 @@ function MapToolbar({
         <SidePanel anchor={anchor}>
             {children}
             <List dense>
-                {hasMultipleOverlays && (
+                {hasAnyOverlays && (
                     <>
                         <ListSubheader>Layers</ListSubheader>
                         {overlays.map((conf) => (
