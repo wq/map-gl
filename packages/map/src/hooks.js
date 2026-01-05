@@ -275,7 +275,7 @@ export function asFeatureCollection(geojson) {
     if (typeof geojson === "string") {
         try {
             geojson = JSON.parse(geojson);
-        } catch (e) {
+        } catch {
             geojson = null;
         }
     }

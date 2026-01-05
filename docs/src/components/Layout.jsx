@@ -46,7 +46,7 @@ const theme = {
     secondary: "#0088bd",
 };
 
-export default function Layout({ children, ...rest }) {
+export default function Layout({ children }) {
     return (
         <Root wq={overrides} theme={theme}>
             <Container>
