@@ -5,10 +5,18 @@ import {
     MapAutoZoom,
     MapIdentify,
     HighlightPopup,
+    InMapPopup,
+    ModalPopup,
+    HighlightContent,
     createMapInstance,
 } from "./components/index.js";
 import { Geojson, Highlight, VectorTile, Tile } from "./overlays/index.js";
-import { useMapInstance, useGeolocation, useBasemapStyle } from "./hooks.js";
+import {
+    useMapInstance,
+    useGeolocation,
+    useBasemapStyle,
+    useStyleProp,
+} from "./hooks.js";
 
 export {
     MapProvider,
@@ -17,6 +25,9 @@ export {
     MapAutoZoom,
     MapIdentify,
     HighlightPopup,
+    InMapPopup,
+    ModalPopup,
+    HighlightContent,
     Geojson,
     Highlight,
     VectorTile,
@@ -25,4 +36,5 @@ export {
     useMapInstance,
     useGeolocation,
     useBasemapStyle,
+    useStyleProp,
 };

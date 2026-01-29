@@ -78,3 +78,7 @@ export function useBasemapStyle(basemap) {
         };
     }
 }
+
+export function useStyleProp() {
+    return null;
+}

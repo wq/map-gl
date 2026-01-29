@@ -3,4 +3,7 @@ export default {
     setupFiles: ["./setup-jest.js"],
     testMatch: ["**/__tests__/**/*.js?(x)"],
     transformIgnorePatterns: [],
+    moduleNameMapper: {
+        "@wq/map-gl-native": "<rootDir>/src/index.js",
+    },
 };

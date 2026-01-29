@@ -1,13 +1,13 @@
 {
     "name": "@wq/map-gl",
-    "version": "3.0.0-alpha.1",
+    "version": "3.0.0-alpha.2",
     "description": "MapLibre GL integration for @wq/map",
     "type": "module",
     "main": "src/index.js",
     "react-native": "src/index.native.js",
     "scripts": {
         "test": "cd ../../ && npm run jest packages/map-gl/",
-        "build": "npm run prettier",
+        "build": "node build.js",
         "prettier": "cd ../../ && npm run prettier -- --write packages/map-gl/",
         "lint": "cd ../../ && npm run eslint packages/map-gl/{,src/,src/*/}*.js"
     },
@@ -34,6 +34,6 @@
         "@wq/map": "^3.0.0-alpha.1"
     },
     "devDependencies": {
-        "@wq/map-gl-web": "^3.0.0-alpha.1"
+        "@wq/map-gl-web": "^3.0.0-alpha.2"
     }
 }

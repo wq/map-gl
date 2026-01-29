@@ -2,7 +2,11 @@ import Map, { createMapInstance } from "./Map.js";
 import MapInteraction from "./MapInteraction.js";
 import MapAutoZoom from "./MapAutoZoom.js";
 import MapIdentify from "./MapIdentify.js";
-import HighlightPopup from "./HighlightPopup.js";
+import HighlightPopup, {
+    InMapPopup,
+    ModalPopup,
+    HighlightContent,
+} from "./HighlightPopup.js";
 
 export {
     Map,
@@ -10,5 +14,8 @@ export {
     MapAutoZoom,
     MapIdentify,
     HighlightPopup,
+    InMapPopup,
+    ModalPopup,
+    HighlightContent,
     createMapInstance,
 };

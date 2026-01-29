@@ -1,2 +1,40 @@
-export * from "@wq/map";
-export * from "@wq/map-gl-native";
+export {
+    AutoMap,
+    AutoOverlay,
+    BasemapToggle,
+    Legend,
+    LegendIcon,
+    MapContainer,
+    MapReducerProvider,
+    MapToolbar,
+    OverlayToggle,
+    asFeatureCollection,
+    asGeometry,
+    contextFeature,
+    contextFeatureCollection,
+    useFeatureCollection,
+    useGeoJSON,
+    useGeometry,
+    useMapReducer,
+    useRootMapReducer,
+} from "@wq/map";
+
+export {
+    Geojson,
+    Highlight,
+    HighlightContent,
+    HighlightPopup,
+    InMapPopup,
+    Map,
+    MapAutoZoom,
+    MapIdentify,
+    MapInteraction,
+    MapProvider,
+    ModalPopup,
+    Tile,
+    VectorTile,
+    useBasemapStyle,
+    useGeolocation,
+    useMapInstance,
+    useStyleProp,
+} from "@wq/map-gl-native";

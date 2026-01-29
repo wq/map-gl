@@ -27,19 +27,35 @@ export default function MapIdentify({ overlays, setHighlight }) {
         }
 
         function updateHighlight(evt, overlay) {
-            const features = evt.features.map((feature) => {
-                feature.popup = overlay.popup;
+            const features = evt.features.map((feat) => {
+                const feature = {
+                    id: feat.id,
+                    type: "Feature",
+                    properties: feat.properties,
+                    geometry: feat.geometry,
+                    popup: overlay.popup,
+                    source: feat.source,
+                    sourceLayer: feat.sourceLayer,
+                };
                 if (
                     feature.source &&
                     feature.sourceLayer &&
                     ["Polygon", "MultiPolygon"].includes(feature.geometry.type)
                 ) {
-                    const sourceFeature = map
-                        .querySourceFeatures(feature.source, {
-                            sourceLayer: feature.sourceLayer,
-                            filter: ["==", ["id"], feature.id],
-                        })
-                        .reduce(union);
+                    const sourceFeatures = map.querySourceFeatures(
+                            feature.source,
+                            {
+                                sourceLayer: feature.sourceLayer,
+                                filter: ["==", ["id"], feature.id],
+                            },
+                        ),
+                        sourceFeature =
+                            sourceFeatures.length > 1
+                                ? union({
+                                      type: "FeatureCollection",
+                                      features: sourceFeatures,
+                                  })
+                                : sourceFeatures[0];
                     if (sourceFeature && sourceFeature.geometry) {
                         feature.geometry = sourceFeature.geometry;
                     }
