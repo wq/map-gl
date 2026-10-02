@@ -36,10 +36,8 @@
         "url": "https://github.com/wq/map-gl/issues"
     },
     "homepage": "https://wq.io/@wq/map-gl",
-    "dependencies": {
-        "@wq/map": "^3.0.0-alpha.2"
-    },
     "peerDependencies": {
+        "@wq/map": "^3.0.0-alpha.2",
         "@wq/map-gl-native": "^3.0.0-alpha.2"
     },
     "peerDependenciesMeta": {

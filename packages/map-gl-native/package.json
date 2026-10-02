@@ -29,12 +29,10 @@
         "url": "https://github.com/wq/map-gl/issues"
     },
     "homepage": "https://map-gl.wq.io/@wq/map-gl",
-    "dependencies": {
-        "@wq/map": "^3.0.0-alpha.3",
-        "@wq/react": "^3.0.0-beta.1"
-    },
     "peerDependencies": {
         "@maplibre/maplibre-react-native": "*",
+        "@wq/map": "^3.0.0-alpha.3",
+        "@wq/react": "^3.0.0-beta.1",
         "expo-location": "*"
     },
     "devDependencies": {

@@ -29,7 +29,9 @@
     },
     "homepage": "https://map-gl.wq.io/@wq/map",
     "dependencies": {
-        "@turf/union": "^7.4.0",
+        "@turf/union": "^7.4.0"
+    },
+    "peerDependencies": {
         "@wq/react": "^3.0.0-beta.1"
     }
 }
