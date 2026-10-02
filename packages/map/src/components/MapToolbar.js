@@ -1,4 +1,3 @@
-import React from "react";
 import PropTypes from "prop-types";
 import { useComponents, createFallbackComponents, withWQ } from "@wq/react";
 import OverlayToggle from "./OverlayToggle.js";

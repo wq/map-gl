@@ -1,40 +1,26 @@
-import React, { useMemo } from "react";
 import PropTypes from "prop-types";
-import { Source, Layer } from "react-map-gl/maplibre";
+import VectorTile from "./VectorTile.js";
+import { useBasemapStyle } from "@wq/map";
 
 export default function Tile({
     name,
     active,
     url,
     tileSize,
-    layout = {},
-    paint = {},
+    layout,
+    paint,
+    before,
 }) {
-    const source = useMemo(() => {
-        return {
-            id: name,
-            type: "raster",
-            tiles: [url],
-            tileSize: tileSize || 256,
-        };
-    }, [name, url]);
-
-    const layer = useMemo(() => {
-        return {
-            id: name,
-            type: "raster",
-            layout:
-                active === false
-                    ? { ...(layout || {}), visibility: "none" }
-                    : layout,
-            paint,
-        };
-    }, [name, active, layout, paint]);
-
+    const style = useBasemapStyle({
+        name,
+        type: "tile",
+        url,
+        tileSize,
+        layout,
+        paint,
+    });
     return (
-        <Source {...source}>
-            <Layer {...layer} />
-        </Source>
+        <VectorTile name={name} active={active} style={style} before={before} />
     );
 }
 
@@ -45,4 +31,5 @@ Tile.propTypes = {
     tileSize: PropTypes.number,
     layout: PropTypes.object,
     paint: PropTypes.object,
+    before: PropTypes.string,
 };

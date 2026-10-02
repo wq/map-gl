@@ -1,6 +1,6 @@
-import js from "@eslint/js";
+import eslintJs from "@eslint/js";
 import globals from "globals";
-import pluginReact from "eslint-plugin-react";
+import eslintReact from "@eslint-react/eslint-plugin";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig([
@@ -9,23 +9,33 @@ export default defineConfig([
     },
     {
         files: ["**/*.{js,mjs,cjs,jsx}"],
-        plugins: { js },
-        extends: ["js/recommended"],
+        extends: [
+            eslintJs.configs.recommended,
+            eslintReact.configs.recommended,
+        ],
         languageOptions: {
             globals: {
                 ...globals.browser,
                 ...globals.jest,
                 ...globals.node,
             },
+            parserOptions: {
+                ecmaFeatures: {
+                    jsx: true,
+                },
+            },
         },
         rules: {
-            "react/prop-types": [
-                2,
-                {
-                    skipUndeclared: true,
-                },
-            ],
+            "@eslint-react/static-components": "off",
+            // TODO: Restore when we drop support for React <= 18
+            "@eslint-react/no-context-provider": "off",
+            "@eslint-react/no-use-context": "off",
         },
     },
-    pluginReact.configs.flat.recommended,
+    {
+        files: ["docs/*.js", "docs/src/**/*.jsx"],
+        rules: {
+            "no-unused-vars": ["error", { varsIgnorePattern: "^React$" }],
+        },
+    },
 ]);

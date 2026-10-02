@@ -1,12 +1,12 @@
 {
     "name": "@wq/map",
-    "version": "3.0.0-alpha.1",
+    "version": "3.0.0-alpha.3",
     "description": "GIS integration for @wq/material",
     "type": "module",
     "main": "index.js",
     "react-native": "src/index.js",
     "scripts": {
-        "test": "cd ../../ && npm run jest packages/map/",
+        "test": "cd ../../ && npm run jest-esm packages/map/",
         "build": "npm run babel && npm run prettier",
         "babel": "cd ../../ && npm run babel -- packages/map/src --out-dir packages/map/",
         "prettier": "cd ../../ && npm run prettier -- --write packages/map/",
@@ -29,6 +29,7 @@
     },
     "homepage": "https://map-gl.wq.io/@wq/map",
     "dependencies": {
-        "@wq/react": "^3.0.0-alpha.0"
+        "@turf/union": "^7.4.0",
+        "@wq/react": "^3.0.0-beta.1"
     }
 }

@@ -1,4 +1,3 @@
-import React from "react";
 import { NavigationControl, ScaleControl } from "react-map-gl/maplibre";
 
 export default function MapInteraction() {

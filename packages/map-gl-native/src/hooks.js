@@ -1,13 +1,20 @@
 import { createContext, useContext } from "react";
 import * as Location from "expo-location";
 
-export const MapContext = createContext({ instance: null, setInstance() {} });
+export const MapContext = createContext({
+    instance: null,
+    setInstance() {},
+    addLayers() {},
+    removeLayers() {},
+    layers: {},
+});
 
 export function useMapInstance() {
     const { instance } = useContext(MapContext) || {};
     return instance;
 }
 
+// eslint-disable-next-line @eslint-react/no-unnecessary-use-prefix
 export function useGeolocation() {
     return {
         supported: true,
@@ -40,45 +47,4 @@ export function useGeolocation() {
             return {};
         }
     }
-}
-
-export function useBasemapStyle(basemap) {
-    if (!basemap) {
-        return null;
-    } else if (basemap.type === "vector-tile") {
-        return basemap.style || basemap.url;
-    } else if (basemap.type !== "tile") {
-        console.warn(`Unsupported basemap type: ${basemap.type}`);
-        return null;
-    } else {
-        const urls = [];
-        if (basemap.url.match("{s}")) {
-            (basemap.subdomains || ["a", "b", "c"]).forEach((s) =>
-                urls.push(basemap.url.replace("{s}", s)),
-            );
-        } else {
-            urls.push(basemap.url);
-        }
-        return {
-            version: 8,
-            sources: {
-                [basemap.name]: {
-                    type: "raster",
-                    tiles: urls,
-                    tileSize: basemap.tileSize || 256,
-                },
-            },
-            layers: [
-                {
-                    id: basemap.name,
-                    type: "raster",
-                    source: basemap.name,
-                },
-            ],
-        };
-    }
-}
-
-export function useStyleProp() {
-    return null;
 }

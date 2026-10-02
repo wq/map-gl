@@ -1,4 +1,3 @@
-import React from "react";
 import { useComponents, withWQ, createFallbackComponents } from "@wq/react";
 import PropTypes from "prop-types";
 

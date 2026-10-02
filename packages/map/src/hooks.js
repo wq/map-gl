@@ -1,4 +1,4 @@
-import React, {
+import {
     createContext,
     useContext,
     useEffect,
@@ -6,15 +6,14 @@ import React, {
     useMemo,
     useReducer,
 } from "react";
-import reducer, { actions } from "./reducer.js";
+import reducer, { actions, initializeState } from "./reducer.js";
 
 export function useRootMapReducer(
     {
         basemaps,
         overlays,
-        initBounds,
+        initialViewState,
         tiles,
-        autoZoom,
         activeOverlays,
         activeBasemap,
     },
@@ -26,12 +25,12 @@ export function useRootMapReducer(
         {
             basemaps: basemaps || [],
             overlays: overlays || [],
-            initBounds,
+            initialViewState,
             tiles,
-            autoZoom,
             activeOverlays,
             activeBasemap,
         },
+        initializeState,
     );
     const boundActions = useMemo(() => {
         const boundActions = {};
@@ -42,34 +41,22 @@ export function useRootMapReducer(
     }, [dispatch]);
 
     useEffect(() => {
-        boundActions.initialize({
-            basemaps,
-            overlays,
-            initBounds,
-            tiles,
-            autoZoom,
-            activeOverlays,
-            activeBasemap,
-        });
-    }, [basemaps, overlays, initBounds, tiles, autoZoom]);
-
-    useEffect(() => {
         if (onChangeBasemap) {
             onChangeBasemap(state.activeBasemap);
         }
-    }, [state.activeBasemap]);
+    }, [onChangeBasemap, state.activeBasemap]);
 
     useEffect(() => {
         if (onChangeOverlays) {
             onChangeOverlays(state.activeOverlays);
         }
-    }, [state.activeOverlays]);
+    }, [onChangeOverlays, state.activeOverlays]);
 
     useEffect(() => {
         if (activeBasemap && activeBasemap !== state.activeBasemap) {
             boundActions.setBasemap(activeBasemap);
         }
-    }, [activeBasemap, state.activeBasemap]);
+    }, [boundActions, activeBasemap, state.activeBasemap]);
 
     useEffect(() => {
         if (activeOverlays && activeOverlays !== state.activeOverlays) {
@@ -84,7 +71,7 @@ export function useRootMapReducer(
                 }
             }
         }
-    }, [activeOverlays, state.activeOverlays]);
+    }, [boundActions, activeOverlays, state.activeOverlays]);
 
     return [state, boundActions];
 }
@@ -193,20 +180,17 @@ export function useGeoJSON(url, data) {
 
     useEffect(() => {
         if (data) {
-            setGeojson(data);
+            queueMicrotask(() => setGeojson(data));
             return;
         }
         if (_cache[url]) {
-            setGeojson(_cache[url]);
-            return;
-        }
-        if (url.match(/\/(new)?(\/edit)?\.geojson$/)) {
-            // Ignore requests for "new.geojson"
-            setGeojson(null);
+            queueMicrotask(() => setGeojson(_cache[url]));
             return;
         }
 
-        fetch(url).then(
+        const controller = new AbortController();
+
+        fetch(url, { signal: controller.signal }).then(
             function (data) {
                 _cache[url] = data;
                 setGeojson(data);
@@ -215,6 +199,7 @@ export function useGeoJSON(url, data) {
                 setGeojson(null);
             },
         );
+        return () => controller.abort();
     }, [url, data]);
 
     return geojson;
@@ -223,7 +208,7 @@ export function useGeoJSON(url, data) {
 export function useGeometry(value, maxGeometries) {
     return useMemo(() => {
         return asGeometry(value, maxGeometries);
-    }, [value]);
+    }, [value, maxGeometries]);
 }
 
 export function useFeatureCollection(value) {
@@ -319,4 +304,305 @@ export function asFeatureCollection(geojson) {
         type: "FeatureCollection",
         features,
     };
+}
+
+export function useDefaultTileSource(tiles) {
+    return useMemo(() => {
+        if (!tiles) {
+            return null;
+        }
+        const origin = tiles.startsWith("/") ? window.location.origin : "";
+        return {
+            name: "Default Tile Source",
+            type: "vector-tile",
+            style: {
+                sources: {
+                    _default: {
+                        type: "vector",
+                        tiles: [origin + tiles],
+                    },
+                },
+                layers: [],
+            },
+        };
+    }, [tiles]);
+}
+
+export function useBasemapStyle({
+    type,
+    url,
+    style,
+    name,
+    tileSize,
+    subdomains,
+    paint,
+    layout,
+} = {}) {
+    return useMemo(
+        () =>
+            makeBasemapStyle({
+                type,
+                url,
+                style,
+                name,
+                tileSize,
+                subdomains,
+                paint,
+                layout,
+            }),
+        [type, url, style, name, tileSize, subdomains, paint, layout],
+    );
+}
+
+export function makeBasemapStyle({
+    type,
+    url,
+    style,
+    name,
+    tileSize,
+    subdomains,
+    paint,
+    layout,
+}) {
+    if (!type || (!url && !style)) {
+        return null;
+    }
+    if (type !== "vector-tile" && type !== "tile") {
+        console.warn(`Unsupported basemap type: ${type}`);
+        return null;
+    }
+    if (type === "vector-tile") {
+        return style || url;
+    } else {
+        if (!url) {
+            console.warn(`No URL specified for basemap "${name}"`);
+            return null;
+        }
+        const urls = [];
+        if (url.match("{s}")) {
+            (subdomains || ["a", "b", "c"]).forEach((s) =>
+                urls.push(url.replace("{s}", s)),
+            );
+        } else {
+            urls.push(url);
+        }
+        return {
+            version: 8,
+            sources: {
+                [name]: {
+                    type: "raster",
+                    tiles: urls,
+                    tileSize: tileSize || 256,
+                },
+            },
+            layers: [
+                {
+                    id: name,
+                    type: "raster",
+                    source: name,
+                    paint: paint || {},
+                    layout: layout || {},
+                },
+            ],
+        };
+    }
+}
+
+export function useStyleProp({
+    name,
+    style,
+    layer,
+    data,
+    color,
+    icon,
+    active,
+}) {
+    const baseStyle = useMemo(
+        () =>
+            makeStyleProp({
+                name,
+                style,
+                layer,
+                data,
+                color,
+                icon,
+            }),
+        [name, style, layer, data, color, icon],
+    );
+    return useMemo(() => {
+        if (active === false || active === true) {
+            return {
+                sources: baseStyle.sources,
+                layers: baseStyle.layers.map((layer) => ({
+                    ...layer,
+                    layout: {
+                        ...(layer.layout || {}),
+                        visibility: active ? "visible" : "none",
+                    },
+                })),
+            };
+        } else {
+            return baseStyle;
+        }
+    }, [baseStyle, active]);
+}
+
+export function makeStyleProp({ name, style, layer, data, color, icon }) {
+    if (!style && !layer && !data) {
+        console.warn(`Specify style, layer, or data for "${name}"`);
+        return { sources: {}, layers: [] };
+    }
+
+    // Style already specified, ensure data is set (if applicable)
+    if (style) {
+        if (layer || color || icon) {
+            console.warn(
+                `Specified style for ${name} - ignoring layer, color, and icon`,
+            );
+        }
+        let sources = style.sources || {},
+            layers = style.layers || [];
+        if (data) {
+            sources[name] = sources[name] || {
+                type: "geojson",
+                data: data,
+            };
+            layers = layers.map((lyr) => ({
+                id: name,
+                source: name,
+                ...lyr,
+            }));
+        }
+        return { sources, layers };
+    }
+
+    // Build style from layer/data, color, and icon
+    let sources, layerProps;
+    if (data) {
+        if (layer) {
+            console.warn(
+                `Both layer and data specified for "${name}", using data.`,
+            );
+        }
+        sources = {
+            [name]: {
+                type: "geojson",
+                data: data,
+            },
+        };
+        layerProps = {
+            id: name,
+            source: name,
+        };
+    } else {
+        sources = {};
+        if (typeof layer === "string") {
+            layerProps = {
+                id: layer,
+                source: "_default",
+                "source-layer": layer,
+            };
+        } else {
+            layerProps = {
+                source: "_default",
+                "source-layer": layer.id,
+                ...layer,
+            };
+        }
+    }
+
+    if (icon) {
+        if (color) {
+            console.warn(
+                `Both color and icon specified for "${name}", using icon.`,
+            );
+        }
+        return {
+            sources: sources,
+            layers: makeSymbolLayers(layerProps, icon),
+        };
+    } else if (color) {
+        return {
+            sources,
+            layers: makeColorLayers(layerProps, color),
+        };
+    } else {
+        return {
+            sources,
+            layers: makeColorLayers(layerProps, "#3388ff", "#3086cc"),
+        };
+    }
+}
+
+function makeSymbolLayers(layer, icon) {
+    return [
+        {
+            type: "symbol",
+            layout: {
+                "icon-image": icon,
+                "icon-allow-overlap": true,
+            },
+            ...layer,
+        },
+    ];
+}
+
+function makeColorLayers(layer, color, pointColor = color) {
+    return [
+        {
+            type: "fill",
+            paint: {
+                "fill-color": color,
+                "fill-opacity": [
+                    "match",
+                    ["geometry-type"],
+                    ["Polygon", "MultiPolygon"],
+                    0.2,
+                    0,
+                ],
+            },
+            ...layer,
+            id: `${layer.id}-fill`,
+        },
+        {
+            type: "line",
+            paint: {
+                "line-width": 3,
+                "line-color": color,
+                "line-opacity": 1,
+            },
+            ...layer,
+            id: `${layer.id}-line`,
+        },
+        {
+            type: "circle",
+            paint: {
+                "circle-color": "white",
+                "circle-radius": [
+                    "match",
+                    ["geometry-type"],
+                    ["Point", "MultiPoint"],
+                    3,
+                    0,
+                ],
+                "circle-stroke-color": pointColor,
+                "circle-stroke-width": [
+                    "match",
+                    ["geometry-type"],
+                    ["Point", "MultiPoint"],
+                    3,
+                    0,
+                ],
+                "circle-opacity": [
+                    "match",
+                    ["geometry-type"],
+                    ["Point", "MultiPoint"],
+                    1,
+                    0,
+                ],
+            },
+            ...layer,
+            id: `${layer.id}-circle`,
+        },
+    ];
 }

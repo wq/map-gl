@@ -1,15 +1,14 @@
-export default function FIXME() {
-    return null;
+import { ModalPopup } from "@wq/map";
+
+export default function HighlightPopup({ inMap, data, onClose }) {
+    if (inMap) {
+        return null;
+    } else {
+        return <ModalPopup data={data} onClose={onClose} />;
+    }
 }
 
 export function InMapPopup() {
-    return null;
-}
-
-export function ModalPopup() {
-    return null;
-}
-
-export function HighlightContent() {
+    // FIXME: Leverage Callout from @maplibre/maplibre-react-native
     return null;
 }

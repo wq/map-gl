@@ -1,4 +1,4 @@
-import React, { useMemo, Fragment } from "react";
+import { Fragment } from "react";
 import {
     useConfig,
     useComponents,
@@ -8,38 +8,37 @@ import {
 import {
     useRootMapReducer,
     useMapReducer,
+    useDefaultTileSource,
     MapReducerProvider,
 } from "../hooks.js";
 import MapContainer from "./MapContainer.js";
+import MapIdentify from "./MapIdentify.js";
 import MapToolbar from "./MapToolbar.js";
 import AutoOverlay from "./AutoOverlay.js";
+import Highlight from "./Highlight.js";
 import PropTypes from "prop-types";
 
 export const AutoMapFallback = {
     config: {
         map: {
             basemaps: _defaultBasemaps(),
-            initBounds: [
-                [-180, -90],
-                [180, 90],
-            ],
+            initialViewState: {
+                bounds: [
+                    [-180, -90],
+                    [180, 90],
+                ],
+            },
             tiles: null,
-            autoZoom: null,
         },
     },
     components: {
         MapContainer,
+        MapIdentify,
         MapToolbar,
         MapLayers: Fragment,
+        Highlight,
         ...createFallbackComponents(
-            [
-                "Map",
-                "MapInteraction",
-                "MapAutoZoom",
-                "MapIdentify",
-                "Highlight",
-                "HighlightPopup",
-            ],
+            ["Map", "MapInteraction", "HighlightPopup"],
             "@wq/map-gl",
             "MapProvider",
         ),
@@ -58,13 +57,11 @@ function AutoMap({
     mapId,
     toolbar: Toolbar = true,
     toolbarAnchor = "top-right",
-    containerStyle,
     context = {},
     overlays: initialOverlays = null,
     basemaps: initialBasemaps = null,
-    initBounds: initialInitBounds = null,
+    initialViewState: initialInitialViewState = null,
     tiles: initialTiles = null,
-    autoZoom: initialAutoZoom = null,
     activeBasemap = null,
     onChangeBasemap = null,
     activeOverlays = null,
@@ -76,23 +73,19 @@ function AutoMap({
     if (initialBasemaps === null) {
         initialBasemaps = config.basemaps;
     }
-    if (initialInitBounds === null) {
-        initialInitBounds = config.initBounds;
+    if (initialInitialViewState === null) {
+        initialInitialViewState = config.initialViewState;
     }
     if (initialTiles === null) {
         initialTiles = config.tiles;
-    }
-    if (initialAutoZoom === null) {
-        initialAutoZoom = config.autoZoom;
     }
 
     const reducer = useRootMapReducer(
             {
                 basemaps: initialBasemaps,
                 overlays: initialOverlays,
-                initBounds: initialInitBounds,
+                initialViewState: initialInitialViewState,
                 tiles: initialTiles,
-                autoZoom: initialAutoZoom,
                 activeBasemap,
                 activeOverlays,
             },
@@ -106,39 +99,19 @@ function AutoMap({
             MapToolbar,
             Map,
             MapInteraction,
-            MapAutoZoom,
             MapIdentify,
             MapLayers,
             AutoOverlay,
             Highlight,
             HighlightPopup,
         } = useComponents(),
-        { basemaps, overlays, initBounds, tiles, autoZoom, highlight } = state,
+        { basemaps, overlays, initialViewState, tiles, highlight } = state,
         { showOverlay, hideOverlay, setBasemap, setHighlight, clearHighlight } =
             actions;
 
-    const defaultTileSource = useMemo(() => {
-        if (!tiles) {
-            return null;
-        }
-        const origin = tiles.startsWith("/") ? window.location.origin : "";
-        return {
-            name: "Default Tile Source",
-            type: "vector-tile",
-            style: {
-                sources: {
-                    _default: {
-                        type: "vector",
-                        tiles: [origin + tiles],
-                    },
-                },
-                layers: [],
-            },
-        };
-    }, [tiles]);
-
+    const defaultTileSource = useDefaultTileSource(tiles);
     const identify = overlays.some((overlay) => !!overlay.popup);
-
+    const basemap = basemaps.find((b) => b.active);
     const toolbar = (() => {
         const toolbarProps = {
             name,
@@ -169,20 +142,11 @@ function AutoMap({
                 <Map
                     name={name}
                     mapId={mapId}
-                    initBounds={initBounds}
-                    containerStyle={containerStyle}
-                    basemap={basemaps.find((b) => b.active)}
+                    basemap={basemap}
+                    initialViewState={initialViewState}
                     {...mapProps}
                 >
                     <MapInteraction name={name} mapId={mapId} />
-                    {!!autoZoom && (
-                        <MapAutoZoom
-                            name={name}
-                            mapId={mapId}
-                            context={context}
-                            {...autoZoom}
-                        />
-                    )}
                     {identify && (
                         <MapIdentify
                             name={name}
@@ -224,7 +188,6 @@ AutoMap.propTypes = {
     mapId: PropTypes.string,
     toolbar: PropTypes.oneOfType([PropTypes.bool, PropTypes.node]),
     toolbarAnchor: PropTypes.string,
-    containerStyle: PropTypes.object,
     context: PropTypes.object,
     overlays: PropTypes.arrayOf(PropTypes.object),
     activeBasemap: PropTypes.string,
@@ -233,9 +196,8 @@ AutoMap.propTypes = {
     onChangeOverlays: PropTypes.func,
     children: PropTypes.node,
     basemaps: PropTypes.arrayOf(PropTypes.object),
-    initBounds: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
+    initialViewState: PropTypes.object,
     tiles: PropTypes.string,
-    autoZoom: PropTypes.object,
     mapProps: PropTypes.object,
 };
 

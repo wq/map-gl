@@ -17,7 +17,6 @@ const emptyState = {
     viewState: null,
     initBounds: undefined,
     tiles: null,
-    autoZoom: null,
     highlight: null,
     mapId: null,
     activeBasemap: null,
@@ -26,40 +25,6 @@ const emptyState = {
 
 export default function reducer(state = emptyState, action) {
     switch (action.type) {
-        case MAP_INITIALIZE: {
-            const {
-                basemaps: initBasemaps,
-                overlays: initOverlays,
-                viewState,
-                initBounds,
-                tiles,
-                autoZoom,
-                highlight,
-                mapId,
-                activeBasemap,
-                activeOverlays,
-            } = { ...emptyState, ...action.payload };
-            const basemaps = reduceBasemaps([], initBasemaps, activeBasemap),
-                overlays = reduceOverlays([], initOverlays, activeOverlays);
-            return {
-                basemaps,
-                overlays,
-                viewState,
-                initBounds,
-                tiles,
-                autoZoom,
-                highlight,
-                mapId,
-                activeBasemap: (
-                    basemaps.find((b) => b.active) ||
-                    basemaps[0] ||
-                    {}
-                ).name,
-                activeOverlays: overlays
-                    .filter((o) => o.active)
-                    .map((o) => o.name),
-            };
-        }
         case MAP_SET_VIEW_STATE:
             return { ...state, viewState: action.payload };
         case MAP_SHOW_OVERLAY: {
@@ -188,6 +153,34 @@ export default function reducer(state = emptyState, action) {
         default:
             return state;
     }
+}
+
+export function initializeState(initialState) {
+    const {
+        basemaps: initBasemaps,
+        overlays: initOverlays,
+        viewState,
+        initialViewState,
+        tiles,
+        highlight,
+        mapId,
+        activeBasemap,
+        activeOverlays,
+    } = { ...emptyState, ...initialState };
+    const basemaps = reduceBasemaps([], initBasemaps, activeBasemap),
+        overlays = reduceOverlays([], initOverlays, activeOverlays);
+    return {
+        basemaps,
+        overlays,
+        viewState,
+        initialViewState,
+        tiles,
+        highlight,
+        mapId,
+        activeBasemap: (basemaps.find((b) => b.active) || basemaps[0] || {})
+            .name,
+        activeOverlays: overlays.filter((o) => o.active).map((o) => o.name),
+    };
 }
 
 function reduceBasemaps(lastBasemaps, nextBasemaps, activeBasemap) {

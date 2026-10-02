@@ -1,6 +1,19 @@
 import { NativeModules } from "react-native";
 
-for (const name of ["MLRNModule", "MLRNLocationModule", "MLRNOfflineModule"]) {
+for (const mod of [
+    "Camera",
+    "GeoJSONSource",
+    "Images",
+    "Location",
+    "Log",
+    "MapView",
+    "Network",
+    "Offline",
+    "StaticMap",
+    "TransformRequest",
+    "VectorSource",
+]) {
+    const name = `MLRN${mod}Module`;
     if (!NativeModules[name]) {
         NativeModules[name] = {};
     }

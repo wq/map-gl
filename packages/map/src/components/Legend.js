@@ -1,4 +1,3 @@
-import React from "react";
 import { useComponents, withWQ, createFallbackComponents } from "@wq/react";
 import LegendIcon from "./LegendIcon.js";
 import PropTypes from "prop-types";

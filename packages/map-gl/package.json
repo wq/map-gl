@@ -1,12 +1,18 @@
 {
     "name": "@wq/map-gl",
-    "version": "3.0.0-alpha.2",
+    "version": "3.0.0-alpha.3",
     "description": "MapLibre GL integration for @wq/map",
     "type": "module",
     "main": "src/index.js",
     "react-native": "src/index.native.js",
+    "exports": {
+        ".": {
+            "react-native": "./src/index.native.js",
+            "default": "./src/index.js"
+        }
+    },
     "scripts": {
-        "test": "cd ../../ && npm run jest packages/map-gl/",
+        "test": "cd ../../ && npm run jest-esm packages/map-gl/",
         "build": "node build.js",
         "prettier": "cd ../../ && npm run prettier -- --write packages/map-gl/",
         "lint": "cd ../../ && npm run eslint packages/map-gl/{,src/,src/*/}*.js"
@@ -31,9 +37,17 @@
     },
     "homepage": "https://wq.io/@wq/map-gl",
     "dependencies": {
-        "@wq/map": "^3.0.0-alpha.1"
+        "@wq/map": "^3.0.0-alpha.2"
+    },
+    "peerDependencies": {
+        "@wq/map-gl-native": "^3.0.0-alpha.2"
+    },
+    "peerDependenciesMeta": {
+        "@wq/map-gl-native": {
+            "optional": true
+        }
     },
     "devDependencies": {
-        "@wq/map-gl-web": "^3.0.0-alpha.2"
+        "@wq/map-gl-web": "^3.0.0-alpha.3"
     }
 }

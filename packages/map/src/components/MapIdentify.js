@@ -1,48 +1,108 @@
-import { useEffect } from "react";
-import { useMapInstance } from "../hooks.js";
+import { useEffect, useRef } from "react";
 import union from "@turf/union";
+import { useComponents, withWQ, createFallbackComponent } from "@wq/react";
+import { makeStyleProp } from "../hooks.js";
 
-export default function MapIdentify({ overlays, setHighlight }) {
-    const map = useMapInstance();
+const MapIdentifyFallback = {
+    components: {
+        useMapInstance: createFallbackComponent(
+            "useMapInstance",
+            "@wq/map-gl",
+            "MapProvider",
+        ),
+    },
+};
+
+function MapIdentify({ overlays, setHighlight }) {
+    const { useMapInstance } = useComponents(),
+        map = useMapInstance();
+    useMapIdentify(map, overlays, setHighlight);
+}
+
+export function useMapIdentify(map, overlays, setHighlight) {
+    const overlaysRef = useRef();
 
     useEffect(() => {
-        if (!map || map._alreadyConfiguredHandlers) {
+        if (overlaysRef.current !== overlays) {
+            overlaysRef.current = overlays;
+        }
+    }, [overlays]);
+
+    useEffect(() => {
+        if (!map) {
             return;
         }
-        map._alreadyConfiguredHandlers = true;
+        const overlays = overlaysRef.current || [],
+            layers = {};
 
-        overlays.forEach((overlay) => {
-            getIdentifyLayers(overlay).forEach((layer) => {
-                map.on("mouseenter", layer, onMouseEnter);
-                map.on("mouseleave", layer, onMouseLeave);
-                map.on("click", layer, (evt) => updateHighlight(evt, overlay));
+        for (const overlay of overlays) {
+            if (!overlay.active) {
+                continue;
+            }
+            for (const layer of getIdentifyLayers(overlay)) {
+                layers[layer] = overlay;
+            }
+        }
+
+        map.on("mousemove", updateCursor);
+        map.on("click", updateHighlight);
+
+        function updateCursor(evt) {
+            updateCursorAsync(evt).catch((err) => {
+                console.error("Error in updateCursor:", err);
             });
-        });
-
-        function onMouseEnter() {
-            map.getCanvas().style.cursor = "pointer";
         }
-        function onMouseLeave() {
-            map.getCanvas().style.cursor = "";
+        async function updateCursorAsync(evt) {
+            const features = await map.queryRenderedFeatures(evt.point, {
+                layers: Object.keys(layers),
+            });
+            if (features.length) {
+                map.getCanvas().style.cursor = "pointer";
+            } else {
+                map.getCanvas().style.cursor = "";
+            }
         }
 
-        function updateHighlight(evt, overlay) {
-            const features = evt.features.map((feat) => {
+        function updateHighlight(evt) {
+            updateHighlightAsync(evt).catch((err) => {
+                console.error("Error in updateHighlight:", err);
+            });
+        }
+        async function updateHighlightAsync(evt) {
+            const renderedfeatures = await map.queryRenderedFeatures(
+                evt.point,
+                {
+                    layers: Object.keys(layers),
+                },
+            );
+            const uniqueFeatures = renderedfeatures.filter(
+                (feature, i) =>
+                    renderedfeatures.findIndex(
+                        (f) =>
+                            f.id === feature.id &&
+                            f.source === feature.source &&
+                            f.sourceLayer === feature.sourceLayer,
+                    ) === i,
+            );
+            const highlightFeatures = uniqueFeatures.map(async (feat) => {
+                const overlay = layers[feat.layer.id];
                 const feature = {
                     id: feat.id,
                     type: "Feature",
-                    properties: feat.properties,
+                    properties: { ...feat.properties },
                     geometry: feat.geometry,
-                    popup: overlay.popup,
+                    popup: overlay?.popup,
+                    overlay: overlay,
+                    layer: feat.layer,
                     source: feat.source,
                     sourceLayer: feat.sourceLayer,
                 };
                 if (
                     feature.source &&
                     feature.sourceLayer &&
-                    ["Polygon", "MultiPolygon"].includes(feature.geometry.type)
+                    feature.geometry.type !== "Point"
                 ) {
-                    const sourceFeatures = map.querySourceFeatures(
+                    const sourceFeatures = await map.querySourceFeatures(
                             feature.source,
                             {
                                 sourceLayer: feature.sourceLayer,
@@ -62,42 +122,37 @@ export default function MapIdentify({ overlays, setHighlight }) {
                 }
                 return feature;
             });
-            setHighlight({ type: "FeatureCollection", features });
+            setHighlight({
+                type: "FeatureCollection",
+                features: await Promise.all(highlightFeatures),
+            });
         }
+
+        return () => {
+            map.off("mousemove", updateCursor);
+            map.off("click", updateHighlight);
+        };
     }, [map, setHighlight]);
 
     return null;
 }
 
-function getIdentifyLayers(overlay) {
+export function getIdentifyLayers(overlay) {
     if (overlay.identifyLayers) {
         return overlay.identifyLayers;
     }
     if (!overlay.popup) {
         return [];
     }
-    if (overlay.type === "geojson") {
-        return ["symbol", "line", "fill", "fill-extrusion", "circle"].map(
-            (type) => `${overlay.name}-${type}`,
-        );
-    } else if (overlay.type === "vector-tile") {
-        if (overlay.style) {
-            return (overlay.style.layers || []).map((layer) => layer.id);
-        } else if (overlay.layer) {
-            const layerId =
-                typeof overlay.layer === "string"
-                    ? overlay.layer
-                    : overlay.layer.id;
-            if (overlay.icon) {
-                return [layerId];
-            } else {
-                return [
-                    `${layerId}-fill`,
-                    `${layerId}-line`,
-                    `${layerId}-circle`,
-                ];
-            }
-        }
+    if (overlay.type == "group") {
+        return (overlay.layers || [])
+            .map((layer) => getIdentifyLayers(layer))
+            .flat();
+    }
+    if (overlay.type === "geojson" || overlay.type === "vector-tile") {
+        return makeStyleProp(overlay).layers.map((layer) => layer.id);
     }
     return [];
 }
+
+export default withWQ(MapIdentify, { fallback: MapIdentifyFallback });

@@ -1,11 +1,12 @@
-import React, { useMemo } from "react";
+import { Fragment, useMemo } from "react";
 import { Popup } from "react-map-gl/maplibre";
 import { useComponents, withWQ, createFallbackComponents } from "@wq/react";
+import { ModalPopup, HighlightContent } from "@wq/map";
 import centroid from "@turf/centroid";
-import PropTypes from "prop-types";
 
 const HighlightPopupFallback = {
     components: {
+        // eslint-disable-next-line @eslint-react/no-unnecessary-use-prefix
         useMinWidth(width) {
             return window.screen.width >= width;
         },
@@ -24,29 +25,38 @@ function HighlightPopup({ data, inMap, onClose }) {
     } else if (!inMap && showInMap) {
         return null;
     } else if (inMap) {
-        return <InMapPopup data={data} onClose={onClose} />;
+        return <InMapPopupWQ data={data} onClose={onClose} />;
     } else {
-        return <ModalPopupWQ data={data} onClose={onClose} />;
+        return <ModalPopup data={data} onClose={onClose} />;
     }
 }
 
 export default withWQ(HighlightPopup, { fallback: HighlightPopupFallback });
 
-export function InMapPopup({ data, onClose }) {
+const InMapPopupFallback = {
+    components: {
+        HighlightContent,
+        MapPopup: Popup,
+        ...createFallbackComponents(["Divider"], "@wq/material"),
+    },
+};
+
+function InMapPopup({ data, onClose }) {
     const dataIsEmpty = !data || !data.features || data.features.length === 0,
         [longitude, latitude] = useMemo(() => {
             if (dataIsEmpty) {
                 return [null, null];
             }
             return centroid(data).geometry.coordinates;
-        }, [data]);
+        }, [data, dataIsEmpty]),
+        { HighlightContent, Divider, MapPopup } = useComponents();
 
     if (dataIsEmpty) {
         return null;
     }
 
     return (
-        <Popup
+        <MapPopup
             latitude={latitude}
             longitude={longitude}
             onClose={onClose}
@@ -54,97 +64,16 @@ export function InMapPopup({ data, onClose }) {
         >
             <div style={{ maxHeight: "40vh", overflowY: "auto" }}>
                 {data.features.map((feature) => (
-                    <HighlightContentWQ
-                        key={feature.id}
-                        feature={feature}
-                        inMap
-                    />
+                    <Fragment key={feature.id}>
+                        {feature !== data.features[0] && <Divider />}
+                        <HighlightContent feature={feature} inMap />
+                    </Fragment>
                 ))}
             </div>
-        </Popup>
+        </MapPopup>
     );
 }
 
-const ModalPopupFallback = {
-    components: createFallbackComponents(
-        ["Popup", "View", "ScrollView", "IconButton"],
-        "@wq/material",
-    ),
-};
+const InMapPopupWQ = withWQ(InMapPopup, { fallback: InMapPopupFallback });
 
-function ModalPopup({ data, onClose }) {
-    const { Popup, View, ScrollView, IconButton } = useComponents(),
-        features = (data && data.features) || [];
-    return (
-        <View style={{ position: "absolute", bottom: 0 }}>
-            <Popup
-                open={features.length > 0}
-                onClose={onClose}
-                variant="persistent"
-            >
-                <IconButton
-                    icon="close"
-                    onClick={onClose}
-                    style={{
-                        position: "absolute",
-                        right: 0,
-                        top: 0,
-                        zIndex: 1,
-                    }}
-                />
-                <ScrollView style={{ maxHeight: "33vh" }}>
-                    {features.map((feature) => (
-                        <HighlightContentWQ
-                            key={feature.id}
-                            feature={feature}
-                        />
-                    ))}
-                </ScrollView>
-            </Popup>
-        </View>
-    );
-}
-
-const ModalPopupWQ = withWQ(ModalPopup, { fallback: ModalPopupFallback });
-
-export { ModalPopupWQ as ModalPopup };
-
-const HighlightContentFallback = {
-    components: {
-        Text({ children }) {
-            return <div>{children}</div>;
-        },
-        DefaultPopup({ feature: { id, properties = {} } }) {
-            const { Text } = useComponents();
-            const label = properties.label || properties.name || id;
-            return <Text>{label}</Text>;
-        },
-    },
-};
-
-function HighlightContent({ feature, inMap }) {
-    const popupName =
-            feature.popup && feature.popup !== true
-                ? feature.popup
-                : "default-popup",
-        components = useComponents();
-
-    let View = components[popupName];
-    if (!View) {
-        console.warn(`No component named ${popupName}, using default.`);
-        View = components["default-popup"];
-    }
-
-    return <View feature={feature} inMap={inMap} />;
-}
-
-HighlightContent.propTypes = {
-    feature: PropTypes.object,
-    inMap: PropTypes.bool,
-};
-
-const HighlightContentWQ = withWQ(HighlightContent, {
-    fallback: HighlightContentFallback,
-});
-
-export { HighlightContentWQ as HighlightContent };
+export { InMapPopupWQ as InMapPopup };

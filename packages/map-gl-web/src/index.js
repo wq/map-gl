@@ -2,39 +2,23 @@ import MapProvider from "./MapProvider.js";
 import {
     Map,
     MapInteraction,
-    MapAutoZoom,
-    MapIdentify,
     HighlightPopup,
     InMapPopup,
-    ModalPopup,
-    HighlightContent,
 } from "./components/index.js";
 
-import { Geojson, Highlight, VectorTile, Tile } from "./overlays/index.js";
+import { Geojson, VectorTile, Tile } from "./overlays/index.js";
 
-import {
-    useMapInstance,
-    useGeolocation,
-    useBasemapStyle,
-    useStyleProp,
-} from "./hooks.js";
+import { useMapInstance, useGeolocation } from "./hooks.js";
 
 export {
     MapProvider,
     Map,
     MapInteraction,
-    MapAutoZoom,
-    MapIdentify,
     HighlightPopup,
     InMapPopup,
-    ModalPopup,
-    HighlightContent,
     Geojson,
-    Highlight,
     VectorTile,
     Tile,
     useMapInstance,
     useGeolocation,
-    useBasemapStyle,
-    useStyleProp,
 };

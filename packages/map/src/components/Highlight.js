@@ -1,12 +1,27 @@
-import React from "react";
 import PropTypes from "prop-types";
-import GeoJSONLayer from "./GeoJSONLayer.js";
+import { useComponents, withWQ, createFallbackComponent } from "@wq/react";
 
-export default function Highlight({ data }) {
-    return (
-        <GeoJSONLayer
-            data={data}
-            fillPaint={{
+const HighlightFallback = {
+    components: {
+        Geojson: createFallbackComponent(
+            "Geojson",
+            "@wq/map-gl",
+            "MapProvider",
+        ),
+    },
+};
+
+export function Highlight({ data }) {
+    const { Geojson } = useComponents();
+    return <Geojson name="Highlight" data={data} style={highlightStyle} />;
+}
+
+export const highlightStyle = {
+    layers: [
+        {
+            id: "highlight-fill",
+            type: "fill",
+            paint: {
                 "fill-color": "#0ff",
                 "fill-opacity": [
                     "match",
@@ -15,13 +30,27 @@ export default function Highlight({ data }) {
                     0.2,
                     0,
                 ],
-            }}
-            linePaint={{
+            },
+        },
+        {
+            id: "highlight-line",
+            type: "line",
+            paint: {
                 "line-width": 5,
                 "line-color": "#0ff",
-                "line-opacity": 1,
-            }}
-            circlePaint={{
+                "line-opacity": [
+                    "match",
+                    ["geometry-type"],
+                    ["LineString", "MultiLineString"],
+                    1,
+                    0,
+                ],
+            },
+        },
+        {
+            id: "highlight-circle",
+            type: "circle",
+            paint: {
                 "circle-color": "#0ff",
                 "circle-radius": [
                     "match",
@@ -37,11 +66,13 @@ export default function Highlight({ data }) {
                     0.7,
                     0,
                 ],
-            }}
-        />
-    );
-}
+            },
+        },
+    ],
+};
 
 Highlight.propTypes = {
     data: PropTypes.object,
 };
+
+export default withWQ(Highlight, { fallback: HighlightFallback });
