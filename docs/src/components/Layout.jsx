@@ -1,4 +1,3 @@
-import React from "react";
 import {
     Root,
     Container,
@@ -17,12 +16,22 @@ import {
     useBreadcrumbs,
 } from "@wq/gatsby-components";
 import { Link } from "gatsby";
-import { Info, Javascript as NpmPackage } from "@mui/icons-material";
+
+import Info from "@mui/icons-material/Info";
+import NpmPackage from "@mui/icons-material/Javascript";
+import Code from "@mui/icons-material/Code";
+
+import Index from "@mui/icons-material/List";
+import Map from "@mui/icons-material/Map";
+import Layers from "@mui/icons-material/Layers";
+import Toolbar from "@mui/icons-material/Tune";
+import Highlight from "@mui/icons-material/HighlightAlt";
+
 import "./styles.css";
 
 const config = {
     site_title: "@wq/map-gl",
-    logo: "https://wq.io/images/icons/wq.svg",
+    logo: "/images/icons/wq.svg",
 };
 
 const components = {
@@ -37,6 +46,12 @@ const components = {
 const icons = {
     Info,
     NpmPackage,
+    Code,
+    Index,
+    Map,
+    Layers,
+    Toolbar,
+    Highlight,
 };
 
 const overrides = { config, components, icons };

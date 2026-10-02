@@ -1,0 +1,28 @@
+---
+folderTitle: Layers
+folderIcon: layers
+title: Overview
+icon: index
+section: Component API
+order: 2
+---
+
+# Layer Components
+
+<ComponentTable
+    folderTitle="Layers"
+    isBase={isBase}
+    componentFolder={componentFolder}
+/>
+
+import ComponentTable from "../../components/ComponentTable.jsx";
+
+export function isBase(page) {
+    return ["AutoOverlay"].includes(page.title);
+}
+
+export function componentFolder(page) {
+    return isBase(page) ? "components" : "overlays";
+}
+
+export { default, Head } from "../../components/Layout.jsx";

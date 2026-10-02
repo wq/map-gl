@@ -1,0 +1,37 @@
+---
+folderTitle: Highlight / Identify
+folderIcon: highlight
+title: Overview
+icon: index
+section: Component API
+order: 4
+---
+
+# Highlight / Identify Components
+
+<ComponentTable
+    folderTitle="Highlight / Identify"
+    isBase={isBase}
+    componentFile={componentFile}
+/>
+
+import ComponentTable from "../../components/ComponentTable.jsx";
+
+export function isBase(page) {
+    return [
+        "Highlight",
+        "HighlightContent",
+        "MapIdentify",
+        "ModalPopup",
+    ].includes(page.title);
+}
+
+export function componentFile(page) {
+    if (page.title === "InMapPopup") {
+        return "HighlightPopup";
+    } else {
+        return page.title;
+    }
+}
+
+export { default, Head } from "../../components/Layout.jsx";

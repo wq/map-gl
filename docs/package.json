@@ -17,14 +17,16 @@
     "dependencies": {
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.1",
-        "@wq/gatsby-components": "^0.1.0",
-        "@wq/material": "^3.0.0-alpha.0",
-        "@wq/material-web": "^3.0.0-alpha.0",
-        "gatsby": "^5.14.6",
-        "gatsby-plugin-emotion": "^8.15.0",
-        "gatsby-plugin-mdx": "^5.15.0",
-        "gatsby-source-filesystem": "^5.15.0",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0"
+        "@wq/gatsby-components": "^0.2.1",
+        "@wq/map-gl": "^3.0.0-alpha.3",
+        "@wq/map-gl-web": "^3.0.0-alpha.3",
+        "@wq/material": "^3.0.0-alpha.3",
+        "@wq/material-web": "^3.0.0-alpha.4",
+        "gatsby": "^5.16.1",
+        "gatsby-plugin-emotion": "^8.16.0",
+        "gatsby-plugin-mdx": "^5.16.0",
+        "gatsby-source-filesystem": "^5.16.0",
+        "react": "^19.3.0",
+        "react-dom": "^19.3.0"
     }
 }

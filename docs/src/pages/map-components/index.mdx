@@ -1,0 +1,22 @@
+---
+folderTitle: Map
+folderIcon: map
+title: Overview
+icon: index
+section: Component API
+order: 1
+---
+
+# Map Components
+
+<ComponentTable folderTitle="Map" isBase={isBase} />
+
+import ComponentTable from "../../components/ComponentTable.jsx";
+
+export function isBase(page) {
+    return ["AutoMap", "MapContainer", "MapReducerProvider"].includes(
+        page.title,
+    );
+}
+
+export { default, Head } from "../../components/Layout.jsx";

@@ -5,7 +5,7 @@ import { defineConfig } from "eslint/config";
 
 export default defineConfig([
     {
-        ignores: ["docs/.cache/**", "docs/public/**"],
+        ignores: ["docs/.cache/**", "docs/public/**", "docs/static/js/**"],
     },
     {
         files: ["**/*.{js,mjs,cjs,jsx}"],
@@ -30,12 +30,6 @@ export default defineConfig([
             // TODO: Restore when we drop support for React <= 18
             "@eslint-react/no-context-provider": "off",
             "@eslint-react/no-use-context": "off",
-        },
-    },
-    {
-        files: ["docs/*.js", "docs/src/**/*.jsx"],
-        rules: {
-            "no-unused-vars": ["error", { varsIgnorePattern: "^React$" }],
         },
     },
 ]);

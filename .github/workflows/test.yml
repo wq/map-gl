@@ -34,7 +34,7 @@ jobs:
               run: |
                   echo "@wq:registry=https://npm.pkg.github.com/wq" > .npmrc
                   echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
-                  npm ci && npm run build
+                  npm ci && npm run build --workspace @wq/map --workspace @wq/map-gl-web
             - name: Install native dependencies
               if: matrix.package == 'map-gl-native'
               run: |
