@@ -41,7 +41,12 @@ export const highlightStyle = {
                 "line-opacity": [
                     "match",
                     ["geometry-type"],
-                    ["LineString", "MultiLineString"],
+                    [
+                        "LineString",
+                        "MultiLineString",
+                        "Polygon",
+                        "MultiPolygon",
+                    ],
                     1,
                     0,
                 ],
