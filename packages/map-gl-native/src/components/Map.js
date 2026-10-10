@@ -12,6 +12,9 @@ function Map({
     initialViewState: initialViewStateProp,
     children,
     style,
+    minZoom,
+    maxZoom,
+    maxBounds,
     ...mapProps
 }) {
     const { setInstance, layers } = useContext(MapContext),
@@ -78,6 +81,9 @@ function Map({
             <Camera
                 ref={cameraRef}
                 initialViewState={initialViewState}
+                minZoom={minZoom}
+                maxZoom={maxZoom}
+                maxBounds={maxBounds}
                 {...cameraProps}
             />
             {children}
