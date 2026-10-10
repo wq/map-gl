@@ -1,6 +1,6 @@
 {
     "name": "@wq/map-gl-native",
-    "version": "3.0.0-alpha.2",
+    "version": "3.0.0-alpha.3",
     "description": "React Native & Expo bindings for @wq/map-gl",
     "type": "module",
     "main": "src/index.js",
@@ -31,8 +31,8 @@
     "homepage": "https://map-gl.wq.io/@wq/map-gl",
     "peerDependencies": {
         "@maplibre/maplibre-react-native": "*",
-        "@wq/map": "^3.0.0-alpha.3",
-        "@wq/react": "^3.0.0-beta.1",
+        "@wq/map": "^3.0.0-alpha.4",
+        "@wq/react": "^3.0.0-beta.2",
         "expo-location": "*"
     },
     "devDependencies": {

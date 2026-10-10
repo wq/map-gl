@@ -1,6 +1,6 @@
 {
     "name": "@wq/map",
-    "version": "3.0.0-alpha.3",
+    "version": "3.0.0-alpha.4",
     "description": "GIS integration for @wq/material",
     "type": "module",
     "main": "index.js",
@@ -32,6 +32,6 @@
         "@turf/union": "^7.4.0"
     },
     "peerDependencies": {
-        "@wq/react": "^3.0.0-beta.1"
+        "@wq/react": "^3.0.0-beta.2"
     }
 }
